@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>حاسبة المعدل - جامعة فلسطين التقنية – خضوري</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__inner">
+      <div class="brand">
+        <div class="brand__mark" aria-hidden="true">خ</div>
+        <div class="brand__text">
+          <div class="brand__title">حاسبة المعدل</div>
+          <div class="brand__subtitle">جامعة فلسطين التقنية – خضوري</div>
+        </div>
+      </div>
+      <div class="topbar__hint">النظام: علامات مئوية من 100</div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="grid">
+      <!-- Semester -->
+      <article class="card">
+        <div class="card__header">
+          <h2 class="card__title">حساب المعدل الفصلي</h2>
+          <p class="card__desc">أدخل علامة كل مادة (0–100) وعدد ساعاتها، وسيتم حساب المعدل الفصلي كنسبة مئوية.</p>
+        </div>
+
+        <div class="table">
+          <div class="table__head">
+            <div>اسم المادة (اختياري)</div>
+            <div>العلامة %</div>
+            <div>الساعات</div>
+            <div></div>
+          </div>
+          <div id="courses" class="table__body"></div>
+        </div>
+
+        <div class="actions">
+          <button id="addCourseBtn" class="btn btn--secondary" type="button">+ إضافة مادة</button>
+          <button id="calcSemesterBtn" class="btn" type="button">احسب المعدل الفصلي</button>
+        </div>
+
+        <div class="results">
+          <div class="metric">
+            <div class="metric__label">المعدل الفصلي</div>
+            <div class="metric__value" id="semesterAvg">—</div>
+          </div>
+          <div class="metric">
+            <div class="metric__label">مجموع ساعات الفصل</div>
+            <div class="metric__value" id="semesterHours">—</div>
+          </div>
+          <div class="metric metric--wide">
+            <div class="metric__label">التقدير (للمعلومة)</div>
+            <div class="metric__value" id="semesterGrade">—</div>
+          </div>
+        </div>
+
+        <div class="note">
+          <strong>ملاحظة:</strong> الحساب هنا بالمئة فقط. التقدير المعروض اختياري للمعلومة.
+        </div>
+      </article>
+
+      <!-- Cumulative -->
+      <article class="card">
+        <div class="card__header">
+          <h2 class="card__title">حساب المعدل التراكمي</h2>
+          <p class="card__desc">أدخل معدلك التراكمي السابق وساعاتك السابقة، وسيتم دمجهم مع نتائج هذا الفصل.</p>
+        </div>
+
+        <div class="form">
+          <label class="field">
+            <span class="field__label">المعدل التراكمي السابق (%)</span>
+            <input id="prevAvg" type="number" inputmode="decimal" min="0" max="100" step="0.01" placeholder="مثال: 78.25" />
+          </label>
+
+          <label class="field">
+            <span class="field__label">عدد الساعات السابقة</span>
+            <input id="prevHours" type="number" inputmode="decimal" min="0" step="0.5" placeholder="مثال: 90" />
+          </label>
+
+          <div class="divider"></div>
+
+          <label class="field">
+            <span class="field__label">معدل الفصل الحالي (%)</span>
+            <input id="currAvg" type="number" inputmode="decimal" min="0" max="100" step="0.01" placeholder="يُملأ تلقائياً من الأعلى" />
+            <span class="field__hint">أفضل خيار: اضغط زر “استخدم نتيجة الفصل الحالي” لملئه تلقائياً.</span>
+          </label>
+
+          <label class="field">
+            <span class="field__label">ساعات الفصل الحالي</span>
+            <input id="currHours" type="number" inputmode="decimal" min="0" step="0.5" placeholder="يُملأ تلقائياً من الأعلى" />
+          </label>
+
+          <div class="actions">
+            <button id="useSemesterBtn" class="btn btn--secondary" type="button">استخدم نتيجة الفصل الحالي</button>
+            <button id="calcCumulativeBtn" class="btn" type="button">احسب المعدل التراكمي</button>
+          </div>
+
+          <div class="results results--single">
+            <div class="metric metric--wide">
+              <div class="metric__label">المعدل التراكمي الجديد</div>
+              <div class="metric__value" id="cumulativeAvg">—</div>
+              <div class="metric__sub" id="cumulativeMeta"></div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <h3 class="subhead">مواد مُعادة (اختياري)</h3>
+          <p class="small">
+            استخدم هذا القسم <strong>فقط</strong> إذا كانت العلامة القديمة للمساق ما زالت محسوبة ضمن <em>المعدل التراكمي السابق</em> الذي أدخلته بالأعلى.
+            إذا كشفك الأكاديمي الحالي أصلاً “استبدل” العلامة القديمة بالجديدة، اترك هذا القسم فارغًا.
+          </p>
+
+          <label class="field">
+            <span class="field__label">طريقة الاحتساب للمواد المعادة</span>
+            <select id="repeatPolicy" class="select">
+              <option value="replace">استبدال العلامة القديمة بالجديدة (حذف أثر القديمة من التراكمي)</option>
+              <option value="both">احتساب المحاولتين معًا (لا حذف)</option>
+            </select>
+            <span class="field__hint">اختر ما يناسب تعليمات كليتك/التسجيل.</span>
+          </label>
+
+          <div class="table table--compact">
+            <div class="table__head table__head--repeat">
+              <div>اسم المساق (اختياري)</div>
+              <div>العلامة القديمة %</div>
+              <div>الساعات</div>
+              <div></div>
+            </div>
+            <div id="repeats" class="table__body"></div>
+          </div>
+
+          <div class="actions">
+            <button id="addRepeatBtn" class="btn btn--secondary" type="button">+ إضافة مساق مُعاد</button>
+          </div>
+
+          <div class="note">
+            <strong>معلومة مهمة:</strong> خيار “الاستبدال” سيطرح أثر العلامة القديمة (العلامة × الساعات) من رصيدك السابق ثم يضيف علامة هذا الفصل.
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <footer class="footer">
+      <span>© حاسبة المعدل — تعمل محلياً (بدون تسجيل دخول).</span>
+    </footer>
+  </main>
+
+  <template id="courseRowTpl">
+    <div class="row">
+      <input class="row__name" type="text" placeholder="مثال: تفاضل 1" />
+      <input class="row__grade" type="number" inputmode="decimal" min="0" max="100" step="0.01" placeholder="0 - 100" />
+      <input class="row__credits" type="number" inputmode="decimal" min="0" step="0.5" placeholder="مثال: 3" />
+      <button class="iconbtn" type="button" title="حذف">
+        <span aria-hidden="true">✕</span>
+      </button>
+    </div>
+  </template>
+
+  <template id="repeatRowTpl">
+    <div class="row row--repeat">
+      <input class="row__name" type="text" placeholder="مثال: تفاضل 1" />
+      <input class="row__oldgrade" type="number" inputmode="decimal" min="0" max="100" step="0.01" placeholder="0 - 100" />
+      <input class="row__credits" type="number" inputmode="decimal" min="0" step="0.5" placeholder="مثال: 3" />
+      <button class="iconbtn iconbtn--danger" type="button" title="حذف">
+        <span aria-hidden="true">✕</span>
+      </button>
+    </div>
+  </template>
+
+  <script src="script.js"></script>
+</body>
+</html>
