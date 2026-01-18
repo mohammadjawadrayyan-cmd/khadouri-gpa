@@ -2,6 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8" />
+  <meta http-equiv="Content-Language" content="ar" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- ✅ SEO أساسيات -->
@@ -10,15 +11,26 @@
   <meta name="keywords" content="حساب المعدل التراكمي خضوري, حساب المعدل الفصلي خضوري, حاسبة المعدل خضوري, جامعة فلسطين التقنية خضوري, khadouri gpa" />
   <meta name="robots" content="index, follow" />
 
-  <!-- ✅ Canonical -->
+  <!-- ✅ Canonical (مع الشرطة / في الآخر) -->
   <link rel="canonical" href="https://mohammadjawadrayyan-cmd.github.io/khadouri-gpa/" />
 
-  <!-- ✅ Open Graph (مشاركة على واتساب/فيسبوك) -->
+  <!-- ✅ حل مشكلة تكرار /index.html (يساعد ضد Alternate page with canonical) -->
+  <script>
+    (function () {
+      try {
+        if (location.pathname.endsWith('/index.html')) {
+          location.replace(location.pathname.replace('/index.html', '/') + location.search + location.hash);
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <!-- ✅ Open Graph -->
   <meta property="og:title" content="حساب المعدل التراكمي خضوري | حاسبة المعدل (100)" />
   <meta property="og:description" content="حاسبة المعدل الفصلي والتراكمي لطلاب جامعة فلسطين التقنية خضوري بنظام 100." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://mohammadjawadrayyan-cmd.github.io/khadouri-gpa/" />
-  <meta property="og:locale" content="ar_AR" />
+  <meta property="og:locale" content="ar_PS" />
 
   <!-- ✅ Twitter -->
   <meta name="twitter:card" content="summary" />
@@ -27,7 +39,7 @@
 
   <link rel="stylesheet" href="styles.css" />
 
-  <!-- ✅ Structured Data (يساعد Google يفهم الموقع) -->
+  <!-- ✅ Structured Data -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -48,7 +60,6 @@
       <div class="brand">
         <div class="brand__mark" aria-hidden="true">خ</div>
         <div class="brand__text">
-          <!-- ✅ خليتها H1 عشان محركات البحث -->
           <h1 class="brand__title">حساب المعدل التراكمي خضوري</h1>
           <p class="brand__subtitle">حاسبة المعدل الفصلي والتراكمي — جامعة فلسطين التقنية – خضوري</p>
         </div>
@@ -58,12 +69,13 @@
   </header>
 
   <main class="container">
-    <!-- ✅ نص بسيط يفهم Google موضوع الصفحة (ما بخرب التصميم) -->
+    <!-- ✅ نص واضح لمحركات البحث (بدون ما يخرب التصميم) -->
     <section class="card" style="margin-bottom: 18px;">
       <div class="card__header">
         <h2 class="card__title">حاسبة المعدل الفصلي والتراكمي (نظام 100)</h2>
         <p class="card__desc">
-          استخدم هذه الأداة لحساب المعدل الفصلي والتراكمي لطلاب خضوري: أدخل العلامات والساعات، واحصل على النتيجة فورًا.
+          حاسبة <strong>حساب المعدل التراكمي خضوري</strong> والمعدل الفصلي لطلاب جامعة فلسطين التقنية – خضوري بنظام 100:
+          أدخل العلامات والساعات واحصل على النتيجة فورًا.
         </p>
       </div>
     </section>
@@ -223,4 +235,3 @@
   <script src="script.js"></script>
 </body>
 </html>
-
