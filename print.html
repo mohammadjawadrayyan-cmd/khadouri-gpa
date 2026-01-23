@@ -3,33 +3,37 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <title>GPA Certificate</title>
 
-  <!-- يقلل الكاش -->
-  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
+  <!-- كسر كاش -->
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
 
-  <meta name="robots" content="noindex, nofollow" />
-  <link rel="stylesheet" href="print.css" />
+  <meta name="robots" content="noindex,nofollow">
+
+  <!-- لاحظ: v= من الرابط بغيّر الملف -->
+  <link rel="stylesheet" href="./print.css">
 </head>
+
 <body>
-  <div class="printbar no-print">
-    <a class="btn" href="./">← Back</a>
-    <button class="btn btn--primary" id="btnPrint" type="button">Print</button>
+  <div class="toolbar no-print">
+    <a class="btn" href="./">Back / رجوع</a>
+    <button class="btn btn--primary" id="btnPrint">Print / طباعة</button>
   </div>
 
   <main class="sheet" id="sheet">
-    <header class="header">
+    <header class="hdr">
       <div class="dateBox">
-        <div class="dateBox__k">Date</div>
-        <div class="dateBox__v" id="dateEn">—</div>
+        <div class="dateLbl">Date / التاريخ</div>
+        <div class="dateVal" id="dateEn">—</div>
       </div>
 
-      <div class="centerBrand">
+      <div class="brand">
         <div class="uniEn" id="uniEn">Palestine Technical University – Kadoorie</div>
         <div class="uniAr" id="uniAr">جامعة فلسطين التقنية – خضوري</div>
-        <div class="docLine" id="docLine">GPA Certificate • شهادة حساب المعدل</div>
+        <div class="doc">GPA Certificate • شهادة حساب المعدل</div>
       </div>
 
       <div class="logo">PTUK</div>
@@ -41,7 +45,8 @@
     </section>
 
     <section class="block">
-      <h2>جدول المواد / Courses</h2>
+      <h2>Courses / جدول المواد</h2>
+
       <div class="tableWrap">
         <table class="tbl">
           <thead>
@@ -58,17 +63,17 @@
       </div>
     </section>
 
-    <section class="summary" id="summary">
-      <div class="sumCard">
-        <div class="sumCard__k">المعدل الفصلي / Semester</div>
-        <div class="sumCard__v" id="semV">—</div>
-        <div class="sumCard__m" id="semM">—</div>
+    <section class="summary">
+      <div class="card">
+        <div class="k">Semester / المعدل الفصلي</div>
+        <div class="v" id="semV">—</div>
+        <div class="m" id="semM">—</div>
       </div>
 
-      <div class="sumCard">
-        <div class="sumCard__k">المعدل التراكمي / Cumulative</div>
-        <div class="sumCard__v" id="cumV">—</div>
-        <div class="sumCard__m" id="cumM">—</div>
+      <div class="card">
+        <div class="k">Cumulative / المعدل التراكمي</div>
+        <div class="v" id="cumV">—</div>
+        <div class="m" id="cumM">—</div>
       </div>
     </section>
 
@@ -77,6 +82,12 @@
     </footer>
   </main>
 
-  <script src="print.js"></script>
+  <!-- مهم: حمل JS مع v من الرابط -->
+  <script>
+    const v = new URLSearchParams(location.search).get("v") || Date.now();
+    const s = document.createElement("script");
+    s.src = "./print.js?v=" + encodeURIComponent(v);
+    document.body.appendChild(s);
+  </script>
 </body>
 </html>
