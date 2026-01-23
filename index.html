@@ -4,161 +4,258 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <title>حساب المعدل التراكمي خضوري | حاسبة المعدل الفصلي والتراكمي (100)</title>
-  <meta name="description" content="حاسبة المعدل الفصلي والتراكمي لطلاب جامعة فلسطين التقنية – خضوري بنظام العلامات من 100." />
+  <title>Khadouri GPA Calculator (100) | حساب المعدل التراكمي خضوري</title>
+  <meta name="description" content="حاسبة المعدل الفصلي والتراكمي لطلاب جامعة فلسطين التقنية – خضوري بنظام 100. Semester & Cumulative calculator (100 scale)." />
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://mohammadjawadrayyan-cmd.github.io/khadouri-gpa/" />
 
-  <meta property="og:title" content="حساب المعدل التراكمي خضوري | حاسبة المعدل (100)" />
-  <meta property="og:description" content="حاسبة المعدل الفصلي والتراكمي لطلاب خضوري بنظام العلامات من 100." />
+  <meta property="og:title" content="Khadouri GPA (100) | حساب المعدل التراكمي خضوري" />
+  <meta property="og:description" content="حاسبة المعدل الفصلي والتراكمي (نظام 100) — Semester & Cumulative calculator." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://mohammadjawadrayyan-cmd.github.io/khadouri-gpa/" />
   <meta property="og:locale" content="ar_AR" />
 
-  <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="حساب المعدل التراكمي خضوري | حاسبة المعدل (100)" />
-  <meta name="twitter:description" content="حاسبة المعدل الفصلي والتراكمي لطلاب خضوري بنظام 100." />
-
   <link rel="stylesheet" href="styles.css" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Khadouri GPA Calculator (100)",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "All",
+    "inLanguage": ["ar","en"],
+    "url": "https://mohammadjawadrayyan-cmd.github.io/khadouri-gpa/",
+    "description": "Semester & Cumulative GPA calculator for PTUK (Khadouri) students on 100 scale."
+  }
+  </script>
 </head>
 
 <body>
   <header class="topbar">
     <div class="topbar__inner container">
       <div class="brand">
-        <div class="brand__mark" aria-hidden="true">
-          <div class="ptuk-badge"><span class="ptuk-badge__t">PTUK</span></div>
-        </div>
-
+        <div class="brand__logo" aria-hidden="true">PTUK</div>
         <div class="brand__text">
-          <h1 class="brand__title">حساب المعدل التراكمي خضوري</h1>
+          <h1 class="brand__title" data-i18n="appTitle">حساب المعدل التراكمي خضوري</h1>
           <p class="brand__subtitle">
-            حاسبة المعدل الفصلي والتراكمي — <span class="uni">جامعة فلسطين التقنية – خضوري</span>
+            <span data-i18n="appSubtitleAr">حاسبة المعدل الفصلي والتراكمي — جامعة فلسطين التقنية – خضوري</span>
+            <span class="dot">•</span>
+            <span class="en" data-i18n="appSubtitleEn">Semester & Cumulative Calculator — Palestine Technical University (Kadoorie)</span>
           </p>
         </div>
       </div>
 
-      <div class="topbar__right">
-        <div class="chip">النظام: 100</div>
-        <div class="chip chip--by">By <strong>Mohammad Jawad</strong></div>
-        <a class="btn btn--cta" href="print.html" target="_blank" rel="noopener">🖨️ شهادة الطباعة</a>
+      <div class="topbar__actions">
+        <span class="chip chip--ghost" data-i18n="systemChip">النظام: 100</span>
+        <span class="chip chip--ghost">By Mohammad Jawad</span>
+
+        <button id="printOpenBtn" class="chip chip--action" type="button" title="Print Certificate">
+          <span class="icon" aria-hidden="true">🖨️</span>
+          <span data-i18n="printChip">شهادة الطباعة</span>
+          <span class="sub" data-i18n="printChipHint">يفتح صفحة جديدة</span>
+        </button>
+
+        <button id="langToggle" class="chip chip--lang" type="button" aria-label="Language toggle">
+          <span class="lang__ar">AR</span>
+          <span class="lang__sep">/</span>
+          <span class="lang__en">EN</span>
+        </button>
       </div>
     </div>
   </header>
 
   <main class="container">
+    <!-- SEO light intro (small, useful) -->
+    <section class="hero card">
+      <h2 class="hero__title" data-i18n="heroTitle">حاسبة المعدل الفصلي والتراكمي (نظام 100)</h2>
+      <p class="hero__desc" data-i18n="heroDesc">
+        أدخل موادك (العلامة + الساعات) لتحصل على المعدل الفصلي، ثم احسب المعدل التراكمي بإضافة معدلك وساعاتك السابقة.
+      </p>
+      <ul class="hero__bullets">
+        <li data-i18n="heroB1">بدون تسجيل دخول — يعمل محليًا.</li>
+        <li data-i18n="heroB2">يدعم المساقات المعادة (استبدال العلامة القديمة).</li>
+        <li data-i18n="heroB3">شهادة طباعة أنيقة بصفحة منفصلة.</li>
+      </ul>
+    </section>
+
     <section class="grid">
-      <!-- الفصل -->
+      <!-- Semester -->
       <article class="card">
         <div class="card__header">
-          <div class="headerRow">
-            <h2 class="card__title">حساب المعدل الفصلي</h2>
-            <div class="miniNote">
-              <span class="dot"></span>
-              <span><strong>الإعادة:</strong> فعِّل “مُعادة؟” واكتب العلامة السابقة (للتراكمي فقط).</span>
-            </div>
+          <h2 class="card__title" data-i18n="semTitle">حساب المعدل الفصلي</h2>
+          <p class="card__desc" data-i18n="semDesc">أدخل علامة كل مادة (0–100) وعدد ساعاتها. إذا المادة معادة فعّل (معادة؟) وأدخل العلامة السابقة.</p>
+          <div class="note-inline">
+            <span class="badge" data-i18n="repeatBadge">الإعادة</span>
+            <span data-i18n="repeatHint">إذا كانت العلامة القديمة محسوبة ضمن معدلك السابق، فعّل (معادة؟) وأدخل العلامة السابقة.</span>
           </div>
-
-          <p class="card__desc">أدخل علامة كل مادة (0–100) وعدد ساعاتها، وسيتم حساب المعدل الفصلي كنسبة مئوية.</p>
         </div>
 
-        <div class="table">
-          <div class="table__head">
-            <div>اسم المادة</div>
-            <div>العلامة %</div>
-            <div>الساعات</div>
-            <div class="nowrap">مُعادة؟</div>
-            <div>العلامة السابقة</div>
+        <div class="tableWrap">
+          <div class="tableHeader">
+            <div data-i18n="colName">اسم المادة</div>
+            <div data-i18n="colGrade">العلامة %</div>
+            <div data-i18n="colCredits">الساعات</div>
+            <div data-i18n="colRepeat">معادة؟</div>
+            <div data-i18n="colOldGrade">العلامة السابقة</div>
             <div></div>
           </div>
-          <div id="courses" class="table__body"></div>
+          <div id="courses" class="tableBody"></div>
         </div>
 
         <div class="actions">
-          <button id="addCourseBtn" class="btn btn--secondary" type="button">+ إضافة مادة</button>
-          <button id="calcSemesterBtn" class="btn" type="button">احسب المعدل الفصلي</button>
+          <button id="addCourseBtn" class="btn btn--secondary" type="button">
+            <span aria-hidden="true">＋</span> <span data-i18n="addCourse">إضافة مادة</span>
+          </button>
+          <button id="calcSemesterBtn" class="btn" type="button">
+            <span data-i18n="calcSem">احسب المعدل الفصلي</span>
+          </button>
         </div>
 
-        <div id="alertBox" class="alert" hidden></div>
+        <div id="semAlert" class="alert" role="status" aria-live="polite"></div>
 
         <div class="results">
           <div class="metric">
-            <div class="metric__label">المعدل الفصلي</div>
+            <div class="metric__label" data-i18n="semAvg">المعدل الفصلي</div>
             <div class="metric__value" id="semesterAvg">—</div>
             <div class="metric__sub" id="semesterGrade">—</div>
           </div>
+
           <div class="metric">
-            <div class="metric__label">مجموع ساعات الفصل</div>
+            <div class="metric__label" data-i18n="semHours">مجموع ساعات الفصل</div>
             <div class="metric__value" id="semesterHours">—</div>
-            <div class="metric__sub">Semester Hours</div>
+            <div class="metric__sub" data-i18n="semHoursSub">Semester Hours</div>
           </div>
         </div>
       </article>
 
-      <!-- التراكمي -->
+      <!-- Cumulative -->
       <article class="card">
         <div class="card__header">
-          <h2 class="card__title">حساب المعدل التراكمي</h2>
-          <p class="card__desc">أدخل معدلك التراكمي السابق وساعاتك السابقة، ثم احسب التراكمي الجديد.</p>
+          <h2 class="card__title" data-i18n="cumTitle">حساب المعدل التراكمي</h2>
+          <p class="card__desc" data-i18n="cumDesc">أدخل معدلك وساعاتك السابقة، ثم دمجها مع نتائج هذا الفصل (مع دعم الاستبدال للمساقات المعادة).</p>
         </div>
 
         <div class="form">
-          <div class="row2">
+          <div class="formGrid">
             <label class="field">
-              <span class="field__label">المعدل التراكمي السابق (%)</span>
-              <input id="prevAvg" class="input" type="number" inputmode="decimal" min="0" max="100" step="0.01" placeholder="مثال: 83.70" />
+              <span class="field__label" data-i18n="prevAvg">المعدل التراكمي السابق (%)</span>
+              <input id="prevAvg" type="number" inputmode="decimal" min="0" max="100" step="0.01" placeholder="مثال: 83.70" />
             </label>
 
             <label class="field">
-              <span class="field__label">عدد الساعات السابقة</span>
-              <input id="prevHours" class="input" type="number" inputmode="decimal" min="0" step="0.5" placeholder="مثال: 39" />
+              <span class="field__label" data-i18n="prevHours">عدد الساعات السابقة</span>
+              <input id="prevHours" type="number" inputmode="decimal" min="0" step="0.5" placeholder="مثال: 39" />
             </label>
           </div>
 
           <div class="divider"></div>
 
-          <div class="actions actions--spread">
-            <button id="useSemesterBtn" class="btn btn--secondary" type="button">استخدم نتيجة الفصل الحالي</button>
-            <button id="calcCumulativeBtn" class="btn" type="button">احسب المعدل التراكمي</button>
+          <div class="formGrid">
+            <label class="field">
+              <span class="field__label" data-i18n="currAvg">معدل الفصل الحالي (%)</span>
+              <input id="currAvg" type="number" inputmode="decimal" min="0" max="100" step="0.01" placeholder="—" />
+            </label>
+
+            <label class="field">
+              <span class="field__label" data-i18n="currHours">ساعات الفصل الحالي</span>
+              <input id="currHours" type="number" inputmode="decimal" min="0" step="0.5" placeholder="—" />
+            </label>
           </div>
 
-          <div id="congratsBox" class="congrats" hidden>
-            🎉 مبروك! لقد تحسن معدلك التراكمي — استمر!
+          <div class="actions actions--spread">
+            <button id="useSemesterBtn" class="btn btn--secondary" type="button">
+              <span data-i18n="useSem">استخدم نتيجة الفصل الحالي</span>
+            </button>
+            <button id="calcCumulativeBtn" class="btn" type="button">
+              <span data-i18n="calcCum">احسب المعدل التراكمي</span>
+            </button>
           </div>
+
+          <div id="cumAlert" class="alert" role="status" aria-live="polite"></div>
 
           <div class="results results--single">
             <div class="metric metric--wide">
-              <div class="metric__label">المعدل التراكمي الجديد</div>
+              <div class="metric__label" data-i18n="newCum">المعدل التراكمي الجديد</div>
               <div class="metric__value" id="cumulativeAvg">—</div>
               <div class="metric__sub" id="cumulativeMeta">—</div>
             </div>
           </div>
 
-          <div class="printbar">
-            <button id="openPrintBtn" class="btn btn--ghost btn--print" type="button">
-              🖨️ فتح شهادة الطباعة (صفحة جديدة)
-            </button>
+          <div class="spark" id="improveBox" hidden>
+            <div class="spark__title" data-i18n="congratsTitle">مبروك! 🎉</div>
+            <div class="spark__text" id="improveText">—</div>
+          </div>
+
+          <div class="note-right">
+            <strong data-i18n="repeatNoteTitle">ملاحظة الإعادة:</strong>
+            <span data-i18n="repeatNoteText">نحسب المساق المعاد على أساس الاستبدال: نطرح أثر العلامة القديمة ثم نضيف علامة هذا الفصل.</span>
           </div>
         </div>
       </article>
     </section>
 
+    <section class="card faq">
+      <h3 class="faq__title" data-i18n="faqTitle">أسئلة شائعة</h3>
+
+      <details>
+        <summary data-i18n="faqQ1">كيف أحسب المعدل الفصلي؟</summary>
+        <p data-i18n="faqA1">نجمع (العلامة × الساعات) لكل المواد ثم نقسم على مجموع الساعات.</p>
+      </details>
+
+      <details>
+        <summary data-i18n="faqQ2">متى أستخدم خيار “معادة؟”؟</summary>
+        <p data-i18n="faqA2">إذا كانت العلامة القديمة للمساق محسوبة ضمن معدلك التراكمي السابق الذي أدخلته، فعّل (معادة؟) وأدخل العلامة السابقة.</p>
+      </details>
+
+      <details>
+        <summary data-i18n="faqQ3">هل يتم حفظ بياناتي؟</summary>
+        <p data-i18n="faqA3">لا يتم إرسال أي بيانات. الحفظ محلي على جهازك فقط لتجهيز شهادة الطباعة.</p>
+      </details>
+    </section>
+
     <footer class="footer">
-      <span>© Mohammad Jawad. All rights reserved.</span>
+      <span class="footer__left">© <span id="yearNow"></span> Mohammad Jawad. All rights reserved.</span>
+      <span class="footer__right" data-i18n="footerHint">هذه الأداة غير رسمية ولا تتبع للجامعة.</span>
     </footer>
   </main>
 
   <template id="courseRowTpl">
-    <div class="trow">
-      <input class="input input--name" type="text" placeholder="مثال: Discrete Math" />
-      <input class="input input--num grade" type="number" inputmode="decimal" min="0" max="100" step="0.01" placeholder="0 - 100" />
-      <input class="input input--num credits" type="number" inputmode="decimal" min="0" step="0.5" placeholder="مثال: 3" />
-      <label class="check nowrap">
-        <input class="repeat" type="checkbox" />
-        <span>نعم</span>
-      </label>
-      <input class="input input--num oldgrade" type="number" inputmode="decimal" min="0" max="100" step="0.01" placeholder="مثال: 62" disabled />
-      <button class="iconbtn" type="button" title="حذف"><span aria-hidden="true">✕</span></button>
+    <div class="row">
+      <div class="cell">
+        <label class="sr" data-i18n="colName">اسم المادة</label>
+        <input class="row__name" type="text" placeholder="" />
+        <div class="err"></div>
+      </div>
+
+      <div class="cell">
+        <label class="sr" data-i18n="colGrade">العلامة %</label>
+        <input class="row__grade" type="number" inputmode="decimal" min="0" max="100" step="0.01" placeholder="—" />
+        <div class="err"></div>
+      </div>
+
+      <div class="cell">
+        <label class="sr" data-i18n="colCredits">الساعات</label>
+        <input class="row__credits" type="number" inputmode="decimal" min="0" step="0.5" placeholder="—" />
+        <div class="err"></div>
+      </div>
+
+      <div class="cell cell--center">
+        <label class="sr" data-i18n="colRepeat">معادة؟</label>
+        <input class="row__repeat" type="checkbox" />
+      </div>
+
+      <div class="cell">
+        <label class="sr" data-i18n="colOldGrade">العلامة السابقة</label>
+        <input class="row__oldgrade" type="number" inputmode="decimal" min="0" max="100" step="0.01" placeholder="—" disabled />
+        <div class="err"></div>
+      </div>
+
+      <div class="cell cell--center">
+        <button class="iconbtn" type="button" title="حذف" aria-label="Remove">
+          <span aria-hidden="true">✕</span>
+        </button>
+      </div>
     </div>
   </template>
 
