@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
 
+Disallow: /khadouri-gpa/print.html
+
 Sitemap: https://mohammadjawadrayyan-cmd.github.io/khadouri-gpa/sitemap.xml
