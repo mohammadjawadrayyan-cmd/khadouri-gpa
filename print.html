@@ -4,84 +4,82 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>GPA Certificate</title>
-
-  <!-- لا نفهرس صفحة الطباعة -->
-  <meta name="robots" content="noindex, nofollow" />
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800&family=Inter:wght@400;700&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="print.css" />
+  <link rel="stylesheet" href="./print.css" />
 </head>
+
 <body>
-  <div class="printbar no-print">
-    <button id="btnBack" type="button">← Back</button>
-    <button id="btnPrint" type="button">Print</button>
+  <!-- أزرار الشاشة فقط -->
+  <div class="actions no-print">
+    <a class="btn" href="./">رجوع / Back</a>
+    <button class="btn primary" type="button" onclick="window.print()">طباعة / Print</button>
   </div>
 
-  <main class="sheet" id="sheet">
-    <header class="header">
-      <div class="header__left">
-        <div class="dateBox">
-          <div class="dateBox__k">Date</div>
-          <div class="dateBox__v" id="dateEn">—</div>
+  <main class="page" id="page">
+    <header class="p-header">
+      <div class="p-date">
+        <div class="k">Date / التاريخ</div>
+        <div class="v" id="printDate">—</div>
+      </div>
+
+      <div class="p-brand">
+        <div class="uni">
+          <div class="uni-en" id="uniEn">Palestine Technical University – Kadoorie</div>
+          <div class="uni-ar" id="uniAr">جامعة فلسطين التقنية – خضوري</div>
         </div>
-        <div class="subLine" id="reportType">GPA Certificate</div>
+        <div class="logo" aria-label="PTUK">PTUK</div>
       </div>
 
-      <div class="header__center">
-        <div class="uniEn" id="uniEn">Palestine Technical University – Kadoorie</div>
-        <div class="uniAr" id="uniAr">جامعة فلسطين التقنية – خضوري</div>
-      </div>
-
-      <div class="header__right">
-        <div class="logo">PTUK</div>
+      <div class="p-doc">
+        <div class="doc-en">GPA Certificate</div>
+        <div class="doc-ar">شهادة حساب المعدل</div>
       </div>
     </header>
 
-    <section class="title">
-      <h1 id="titleMain">شهادة حساب المعدل</h1>
-      <p id="titleDesc">هذه الشهادة تُظهر مواد الفصل والمعدل الفصلي والتراكمي (نظام 100).</p>
+    <section class="p-title">
+      <h1>شهادة حساب المعدل</h1>
+      <p>هذه الشهادة تُظهر مواد الفصل والمعدل الفصلي والتراكمي (نظام 100).</p>
     </section>
 
-    <section class="block">
-      <h2 id="tblTitle">جدول المواد / Courses</h2>
-      <div class="tableWrap">
-        <table class="tbl" id="coursesTbl">
+    <section class="p-table">
+      <div class="section-head">جدول المواد <span class="muted">/ Courses</span></div>
+
+      <div class="table-wrap">
+        <table id="coursesTable">
           <thead>
             <tr>
-              <th id="thCourse">اسم المادة / Course</th>
-              <th id="thCredits">الساعات / Credits</th>
-              <th id="thGrade">العلامة / Grade</th>
-              <th id="thResult">النتيجة / Result</th>
-              <th id="thRepeat">معادة؟ / Repeated</th>
+              <th>Course / اسم المادة</th>
+              <th>Credits / الساعات</th>
+              <th>Grade / العلامة</th>
+              <th>Result / النتيجة</th>
+              <th>Repeated / معادة؟</th>
             </tr>
           </thead>
-          <tbody id="tbody"></tbody>
+          <tbody id="coursesTbody">
+            <!-- ينعبي من JS -->
+          </tbody>
         </table>
       </div>
     </section>
 
-    <section class="summary">
-      <div class="sumCard">
-        <div class="sumCard__k" id="semK">المعدل الفصلي / Semester</div>
-        <div class="sumCard__v" id="semV">—</div>
-        <div class="sumCard__m" id="semM">—</div>
-      </div>
+    <section class="p-summary" id="summaryGrid">
+      <article class="card" id="semesterCard">
+        <div class="card-h">المعدل الفصلي <span class="muted">/ Semester</span></div>
+        <div class="big" id="semesterAvg">—</div>
+        <div class="meta" id="semesterMeta">—</div>
+      </article>
 
-      <div class="sumCard">
-        <div class="sumCard__k" id="cumK">المعدل التراكمي / Cumulative</div>
-        <div class="sumCard__v" id="cumV">—</div>
-        <div class="sumCard__m" id="cumM">—</div>
-      </div>
+      <article class="card" id="cumulativeCard">
+        <div class="card-h">المعدل التراكمي <span class="muted">/ Cumulative</span></div>
+        <div class="big" id="cumulativeAvg">—</div>
+        <div class="meta" id="cumulativeMeta">—</div>
+      </article>
     </section>
 
-    <footer class="foot">
-      <div class="copy">© <span id="yearNow"></span> Mohammad Jawad — All rights reserved.</div>
+    <footer class="p-foot">
+      <span id="copyright">© 2026 — All rights reserved.</span>
     </footer>
   </main>
 
-  <script src="print.js"></script>
+  <script src="./print.js"></script>
 </body>
 </html>
