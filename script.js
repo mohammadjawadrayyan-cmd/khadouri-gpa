@@ -1,299 +1,389 @@
-function clamp(n, min, max) {
-  if (Number.isNaN(n)) return NaN;
-  return Math.min(max, Math.max(min, n));
-}
+(() => {
+  const SITE_URL = "https://mohammadjawadrayyan-cmd.github.io/khadouri-gpa/";
 
-function toFixedSmart(x) {
-  if (!Number.isFinite(x)) return "—";
-  return `${x.toFixed(2)}%`;
-}
+  const el = (id) => document.getElementById(id);
 
-function getArabicGradeLabel(avg) {
-  if (!Number.isFinite(avg)) return "—";
-  if (avg >= 90) return "ممتاز";
-  if (avg >= 80) return "جيد جداً";
-  if (avg >= 70) return "جيد";
-  if (avg >= 60) return "مقبول";
-  return "راسب";
-}
+  const coursesWrap = el("courses");
+  const repeatsWrap = el("repeats");
 
-function parseNum(v) {
-  const n = parseFloat(String(v ?? "").trim());
-  return Number.isFinite(n) ? n : NaN;
-}
+  const courseTpl = el("courseRowTpl");
+  const repeatTpl = el("repeatRowTpl");
 
-// ===== Semester (courses) =====
-const coursesDiv = document.getElementById("courses");
-const courseTpl = document.getElementById("courseRowTpl");
+  const addCourseBtn = el("addCourseBtn");
+  const calcSemesterBtn = el("calcSemesterBtn");
 
-const addCourseBtn = document.getElementById("addCourseBtn");
-const calcSemesterBtn = document.getElementById("calcSemesterBtn");
+  const semesterAvgEl = el("semesterAvg");
+  const semesterHoursEl = el("semesterHours");
+  const semesterGradeEl = el("semesterGrade");
 
-const semesterAvgEl = document.getElementById("semesterAvg");
-const semesterHoursEl = document.getElementById("semesterHours");
-const semesterGradeEl = document.getElementById("semesterGrade");
+  const prevAvgEl = el("prevAvg");
+  const prevHoursEl = el("prevHours");
+  const currAvgEl = el("currAvg");
+  const currHoursEl = el("currHours");
 
-// ===== Cumulative =====
-const prevAvg = document.getElementById("prevAvg");
-const prevHours = document.getElementById("prevHours");
-const currAvg = document.getElementById("currAvg");
-const currHours = document.getElementById("currHours");
-const useSemesterBtn = document.getElementById("useSemesterBtn");
-const calcCumulativeBtn = document.getElementById("calcCumulativeBtn");
-const cumulativeAvgEl = document.getElementById("cumulativeAvg");
-const cumulativeMetaEl = document.getElementById("cumulativeMeta");
+  const useSemesterBtn = el("useSemesterBtn");
+  const calcCumulativeBtn = el("calcCumulativeBtn");
 
-// ===== Repeats =====
-const repeatsDiv = document.getElementById("repeats");
-const repeatTpl = document.getElementById("repeatRowTpl");
-const addRepeatBtn = document.getElementById("addRepeatBtn");
-const repeatPolicy = document.getElementById("repeatPolicy");
+  const cumulativeAvgEl = el("cumulativeAvg");
+  const cumulativeMetaEl = el("cumulativeMeta");
+  const congratsMsgEl = el("congratsMsg");
 
-function addCourseRow(initial = {}) {
-  const node = courseTpl.content.cloneNode(true);
-  const row = node.querySelector(".row");
-  const name = node.querySelector(".row__name");
-  const grade = node.querySelector(".row__grade");
-  const credits = node.querySelector(".row__credits");
-  const del = node.querySelector(".iconbtn");
+  const repeatPolicyEl = el("repeatPolicy");
+  const addRepeatBtn = el("addRepeatBtn");
 
-  name.value = initial.name ?? "";
-  grade.value = initial.grade ?? "";
-  credits.value = initial.credits ?? "";
+  const printCertBtn = el("printCertBtn");
 
-  del.addEventListener("click", () => {
-    row.remove();
-    computeSemester(false);
-  });
+  // Print elements
+  const qrImg = el("qrImg");
+  const certMeta = el("certMeta");
+  const stamp = el("stamp");
+  const stampGrade = el("stampGrade");
 
-  [grade, credits].forEach((el) => el.addEventListener("input", () => computeSemester(false)));
+  const pSemesterAvg = el("pSemesterAvg");
+  const pSemesterGrade = el("pSemesterGrade");
+  const pSemesterHours = el("pSemesterHours");
 
-  coursesDiv.appendChild(node);
-}
+  const pCumulativeAvg = el("pCumulativeAvg");
+  const pCumulativeGrade = el("pCumulativeGrade");
 
-function addRepeatRow(initial = {}) {
-  const node = repeatTpl.content.cloneNode(true);
-  const row = node.querySelector(".row");
-  const name = node.querySelector(".row__name");
-  const oldgrade = node.querySelector(".row__oldgrade");
-  const credits = node.querySelector(".row__credits");
-  const del = node.querySelector(".iconbtn");
+  const pNotes = el("pNotes");
 
-  name.value = initial.name ?? "";
-  oldgrade.value = initial.oldgrade ?? "";
-  credits.value = initial.credits ?? "";
+  const pCoursesBody = el("pCoursesBody");
+  const pTotalHours = el("pTotalHours");
+  const pTotalPoints = el("pTotalPoints");
 
-  del.addEventListener("click", () => {
-    row.remove();
-  });
+  const printUrl = el("printUrl");
+  const printDate = el("printDate");
 
-  repeatsDiv.appendChild(node);
-}
+  function fmt(n, digits = 2) {
+    if (!Number.isFinite(n)) return "—";
+    return n.toFixed(digits);
+  }
 
-function getCourseRows() {
-  const rows = coursesDiv.querySelectorAll(".row");
-  const result = [];
-  rows.forEach((row) => {
-    const name = row.querySelector(".row__name").value.trim();
-    const grade = parseNum(row.querySelector(".row__grade").value);
-    const credits = parseNum(row.querySelector(".row__credits").value);
-    result.push({ name, grade, credits, row });
-  });
-  return result;
-}
+  function clamp(n, min, max){
+    return Math.min(max, Math.max(min, n));
+  }
 
-function getRepeatRows() {
-  const rows = repeatsDiv.querySelectorAll(".row");
-  const result = [];
-  rows.forEach((row) => {
-    const name = row.querySelector(".row__name").value.trim();
-    const oldgrade = parseNum(row.querySelector(".row__oldgrade").value);
-    const credits = parseNum(row.querySelector(".row__credits").value);
-    result.push({ name, oldgrade, credits, row });
-  });
-  return result;
-}
+  function gradeLabel(avg){
+    if (!Number.isFinite(avg)) return "—";
+    if (avg >= 90) return "ممتاز";
+    if (avg >= 85) return "جيد جدًا";
+    if (avg >= 75) return "جيد";
+    if (avg >= 65) return "مقبول";
+    return "راسب";
+  }
 
-function computeSemester(showAlerts = true) {
-  const courses = getCourseRows();
-  let totalQP = 0;
-  let totalHrs = 0;
+  function stampClass(label){
+    switch(label){
+      case "ممتاز": return "stamp--excellent";
+      case "جيد جدًا": return "stamp--vgood";
+      case "جيد": return "stamp--good";
+      case "مقبول": return "stamp--pass";
+      default: return "stamp--fail";
+    }
+  }
 
-  let hasAny = false;
-  let bad = false;
+  function parseNum(value){
+    const n = Number(value);
+    return Number.isFinite(n) ? n : NaN;
+  }
 
-  courses.forEach((c) => {
-    const g = clamp(c.grade, 0, 100);
-    const cr = c.credits;
+  function rowValues(row){
+    const name = row.querySelector(".row__name")?.value?.trim() || "";
+    const grade = parseNum(row.querySelector(".row__grade")?.value);
+    const credits = parseNum(row.querySelector(".row__credits")?.value);
+    return { name, grade, credits };
+  }
 
-    const gradeEl = c.row.querySelector(".row__grade");
-    const credEl = c.row.querySelector(".row__credits");
-    gradeEl.style.borderColor = "rgba(255,255,255,.14)";
-    credEl.style.borderColor = "rgba(255,255,255,.14)";
+  function repeatValues(row){
+    const name = row.querySelector(".row__name")?.value?.trim() || "";
+    const oldgrade = parseNum(row.querySelector(".row__oldgrade")?.value);
+    const credits = parseNum(row.querySelector(".row__credits")?.value);
+    return { name, oldgrade, credits };
+  }
 
-    if (Number.isFinite(g) || Number.isFinite(cr)) hasAny = true;
+  function addCourseRow(prefill = {}){
+    const node = courseTpl.content.firstElementChild.cloneNode(true);
+    if (prefill.name) node.querySelector(".row__name").value = prefill.name;
+    if (Number.isFinite(prefill.grade)) node.querySelector(".row__grade").value = prefill.grade;
+    if (Number.isFinite(prefill.credits)) node.querySelector(".row__credits").value = prefill.credits;
 
-    if (!Number.isFinite(g) || !Number.isFinite(cr) || cr <= 0) {
-      if (Number.isFinite(c.grade) || Number.isFinite(cr)) {
-        bad = true;
-        if (!Number.isFinite(g)) gradeEl.style.borderColor = "rgba(255,107,107,.55)";
-        if (!Number.isFinite(cr) || cr <= 0) credEl.style.borderColor = "rgba(255,107,107,.55)";
+    node.querySelector("button").addEventListener("click", () => node.remove());
+    coursesWrap.appendChild(node);
+  }
+
+  function addRepeatRow(prefill = {}){
+    const node = repeatTpl.content.firstElementChild.cloneNode(true);
+    if (prefill.name) node.querySelector(".row__name").value = prefill.name;
+    if (Number.isFinite(prefill.oldgrade)) node.querySelector(".row__oldgrade").value = prefill.oldgrade;
+    if (Number.isFinite(prefill.credits)) node.querySelector(".row__credits").value = prefill.credits;
+
+    node.querySelector("button").addEventListener("click", () => node.remove());
+    repeatsWrap.appendChild(node);
+  }
+
+  function getSemesterComputation(){
+    const rows = [...coursesWrap.querySelectorAll(".row")];
+    let points = 0;
+    let hours = 0;
+    const items = [];
+
+    for (const r of rows){
+      const { name, grade, credits } = rowValues(r);
+      if (!Number.isFinite(grade) && !Number.isFinite(credits) && !name) continue;
+
+      if (!Number.isFinite(grade) || grade < 0 || grade > 100) {
+        r.querySelector(".row__grade").focus();
+        throw new Error("تأكد أن العلامة بين 0 و 100.");
       }
-      return;
-    }
-
-    totalQP += g * cr;
-    totalHrs += cr;
-  });
-
-  if (!hasAny) {
-    semesterAvgEl.textContent = "—";
-    semesterHoursEl.textContent = "—";
-    semesterGradeEl.textContent = "—";
-    return { avg: NaN, hours: NaN, qp: NaN, bad: false };
-  }
-
-  if (bad || totalHrs <= 0) {
-    semesterAvgEl.textContent = "—";
-    semesterHoursEl.textContent = "—";
-    semesterGradeEl.textContent = "—";
-    if (showAlerts) alert("تأكد من إدخال علامة (0–100) وساعات أكبر من صفر لكل مادة.");
-    return { avg: NaN, hours: NaN, qp: NaN, bad: true };
-  }
-
-  const avg = totalQP / totalHrs;
-  semesterAvgEl.textContent = toFixedSmart(avg);
-  semesterHoursEl.textContent = `${totalHrs}`;
-  semesterGradeEl.textContent = getArabicGradeLabel(avg);
-
-  return { avg, hours: totalHrs, qp: totalQP, bad: false };
-}
-
-function useSemesterResult() {
-  const s = computeSemester(false);
-  if (!Number.isFinite(s.avg) || !Number.isFinite(s.hours)) {
-    alert("احسب المعدل الفصلي أولاً (أو أدخل مواد الفصل بشكل صحيح) ثم اضغط: استخدم نتيجة الفصل الحالي.");
-    return;
-  }
-  currAvg.value = s.avg.toFixed(2);
-  currHours.value = s.hours;
-}
-
-function computeCumulative() {
-  const pAvg = clamp(parseNum(prevAvg.value), 0, 100);
-  const pHrs = parseNum(prevHours.value);
-
-  // if current fields empty, try use semester result softly
-  let cAvg = clamp(parseNum(currAvg.value), 0, 100);
-  let cHrs = parseNum(currHours.value);
-
-  if ((!Number.isFinite(cAvg) || !Number.isFinite(cHrs)) && Number.isFinite(pAvg) && Number.isFinite(pHrs)) {
-    const s = computeSemester(false);
-    if (Number.isFinite(s.avg) && Number.isFinite(s.hours)) {
-      cAvg = s.avg;
-      cHrs = s.hours;
-      currAvg.value = s.avg.toFixed(2);
-      currHours.value = s.hours;
-    }
-  }
-
-  const fields = [
-    { el: prevAvg, ok: Number.isFinite(pAvg) },
-    { el: prevHours, ok: Number.isFinite(pHrs) && pHrs >= 0 },
-    { el: currAvg, ok: Number.isFinite(cAvg) },
-    { el: currHours, ok: Number.isFinite(cHrs) && cHrs >= 0 }
-  ];
-  fields.forEach(f => f.el.style.borderColor = f.ok ? "rgba(255,255,255,.14)" : "rgba(255,107,107,.55)");
-
-  if (!fields.every(f => f.ok)) {
-    cumulativeAvgEl.textContent = "—";
-    cumulativeMetaEl.textContent = "";
-    alert("تأكد من إدخال القيم المطلوبة بشكل صحيح (المعدل 0–100، والساعات رقم غير سالب).");
-    return;
-  }
-
-  // Repeats handling
-  const repeats = getRepeatRows();
-  let subQP = 0;
-  let subHrs = 0;
-
-  // reset repeat field borders
-  repeats.forEach(r => {
-    const gEl = r.row.querySelector(".row__oldgrade");
-    const cEl = r.row.querySelector(".row__credits");
-    gEl.style.borderColor = "rgba(255,255,255,.14)";
-    cEl.style.borderColor = "rgba(255,255,255,.14)";
-  });
-
-  if (repeats.length > 0 && repeatPolicy.value === "replace") {
-    let badRepeat = false;
-
-    repeats.forEach(r => {
-      const g = clamp(r.oldgrade, 0, 100);
-      const cr = r.credits;
-
-      if (!Number.isFinite(g) || !Number.isFinite(cr) || cr <= 0) {
-        badRepeat = true;
-        const gEl = r.row.querySelector(".row__oldgrade");
-        const cEl = r.row.querySelector(".row__credits");
-        if (!Number.isFinite(g)) gEl.style.borderColor = "rgba(255,107,107,.55)";
-        if (!Number.isFinite(cr) || cr <= 0) cEl.style.borderColor = "rgba(255,107,107,.55)";
-        return;
+      if (!Number.isFinite(credits) || credits <= 0) {
+        r.querySelector(".row__credits").focus();
+        throw new Error("تأكد أن الساعات رقم أكبر من 0.");
       }
 
-      subQP += g * cr;
-      subHrs += cr;
-    });
+      const g = clamp(grade, 0, 100);
+      const c = credits;
+      const p = g * c;
 
-    if (badRepeat) {
-      cumulativeAvgEl.textContent = "—";
-      cumulativeMetaEl.textContent = "";
-      alert("في قسم المواد المعادة: تأكد من إدخال العلامة القديمة (0–100) والساعات بشكل صحيح.");
-      return;
+      points += p;
+      hours += c;
+      items.push({ name: name || "—", grade: g, credits: c, points: p });
     }
 
-    if (subHrs > pHrs) {
-      cumulativeAvgEl.textContent = "—";
-      cumulativeMetaEl.textContent = "";
-      alert("مجموع ساعات المواد المعادة أكبر من الساعات السابقة! راجع إدخالاتك.");
-      return;
+    if (hours <= 0) throw new Error("أدخل مادة واحدة على الأقل مع ساعاتها.");
+    const avg = points / hours;
+
+    return { avg, hours, points, items };
+  }
+
+  function getRepeats(){
+    const rows = [...repeatsWrap.querySelectorAll(".row")];
+    const repeats = [];
+
+    for (const r of rows){
+      const { name, oldgrade, credits } = repeatValues(r);
+      if (!Number.isFinite(oldgrade) && !Number.isFinite(credits) && !name) continue;
+
+      if (!Number.isFinite(oldgrade) || oldgrade < 0 || oldgrade > 100) {
+        r.querySelector(".row__oldgrade").focus();
+        throw new Error("في المواد المُعادة: تأكد أن العلامة القديمة بين 0 و 100.");
+      }
+      if (!Number.isFinite(credits) || credits <= 0) {
+        r.querySelector(".row__credits").focus();
+        throw new Error("في المواد المُعادة: تأكد أن الساعات رقم أكبر من 0.");
+      }
+
+      repeats.push({
+        name: name || "—",
+        oldgrade: clamp(oldgrade, 0, 100),
+        credits
+      });
+    }
+    return repeats;
+  }
+
+  function calcSemester(){
+    try {
+      const { avg, hours } = getSemesterComputation();
+      semesterAvgEl.textContent = fmt(avg);
+      semesterHoursEl.textContent = fmt(hours, 1);
+      semesterGradeEl.textContent = gradeLabel(avg);
+      return true;
+    } catch (err){
+      alert(err.message || "حدث خطأ.");
+      return false;
     }
   }
 
-  const prevQP = pAvg * pHrs;
-  const currQP = cAvg * cHrs;
+  function calcCumulative(){
+    try {
+      const prevAvg = parseNum(prevAvgEl.value);
+      const prevHours = parseNum(prevHoursEl.value);
 
-  const totalQP = prevQP + currQP - subQP;
-  const totalHrs = pHrs + cHrs - subHrs;
+      if (!Number.isFinite(prevAvg) || prevAvg < 0 || prevAvg > 100){
+        prevAvgEl.focus();
+        throw new Error("أدخل المعدل التراكمي السابق (0–100).");
+      }
+      if (!Number.isFinite(prevHours) || prevHours < 0){
+        prevHoursEl.focus();
+        throw new Error("أدخل عدد الساعات السابقة بشكل صحيح.");
+      }
 
-  if (totalHrs <= 0) {
-    cumulativeAvgEl.textContent = "—";
-    cumulativeMetaEl.textContent = "";
-    alert("مجموع الساعات لازم يكون أكبر من صفر.");
-    return;
+      const currAvg = parseNum(currAvgEl.value);
+      const currHours = parseNum(currHoursEl.value);
+
+      if (!Number.isFinite(currAvg) || currAvg < 0 || currAvg > 100){
+        currAvgEl.focus();
+        throw new Error("أدخل معدل الفصل الحالي (0–100) أو استخدم زر تعبئة الفصل.");
+      }
+      if (!Number.isFinite(currHours) || currHours <= 0){
+        currHoursEl.focus();
+        throw new Error("أدخل ساعات الفصل الحالي بشكل صحيح.");
+      }
+
+      const policy = repeatPolicyEl.value;
+      const repeats = getRepeats();
+
+      let prevPoints = prevAvg * prevHours;
+      let adjPrevHours = prevHours;
+
+      let removedPoints = 0;
+      let removedHours = 0;
+
+      if (policy === "replace" && repeats.length){
+        for (const rep of repeats){
+          removedPoints += rep.oldgrade * rep.credits;
+          removedHours += rep.credits;
+        }
+        prevPoints -= removedPoints;
+        adjPrevHours -= removedHours;
+        if (adjPrevHours < 0) adjPrevHours = 0; // حماية
+      }
+
+      const currPoints = currAvg * currHours;
+      const totalPoints = prevPoints + currPoints;
+      const totalHours = adjPrevHours + currHours;
+
+      if (totalHours <= 0) throw new Error("مجموع الساعات غير صحيح.");
+
+      const newAvg = totalPoints / totalHours;
+
+      cumulativeAvgEl.textContent = fmt(newAvg);
+      const metaParts = [
+        `ساعات سابقة بعد التعديل: ${fmt(adjPrevHours,1)}`,
+        `ساعات الفصل الحالي: ${fmt(currHours,1)}`
+      ];
+      if (policy === "replace" && repeats.length){
+        metaParts.push(`تم حذف أثر مواد مُعادة: ${fmt(removedHours,1)} ساعة`);
+      }
+      cumulativeMetaEl.textContent = metaParts.join(" • ");
+
+      // Congrats message (تحسّن المعدل)
+      const diff = newAvg - prevAvg;
+      if (Number.isFinite(diff) && diff > 0.005){
+        congratsMsgEl.style.display = "block";
+        congratsMsgEl.textContent = `مبروك! لقد تحسّن معدلك بمقدار ${fmt(diff,2)} نقطة 🎉`;
+      } else {
+        congratsMsgEl.style.display = "none";
+        congratsMsgEl.textContent = "";
+      }
+
+      return { newAvg, prevAvg, prevHours: adjPrevHours, currAvg, currHours, policy, repeats };
+    } catch (err){
+      alert(err.message || "حدث خطأ.");
+      return null;
+    }
   }
 
-  const newAvg = totalQP / totalHrs;
+  function fillFromSemester(){
+    try{
+      const { avg, hours } = getSemesterComputation();
+      currAvgEl.value = fmt(avg);
+      currHoursEl.value = fmt(hours, 1);
+    } catch (err){
+      alert(err.message || "احسب الفصل أولاً.");
+    }
+  }
 
-  cumulativeAvgEl.textContent = toFixedSmart(newAvg);
+  function buildPrintCertificate(){
+    // تأكد من حساب الفصل والتراكمي (حتى لو المستخدم ناسي)
+    const semOk = calcSemester();
+    if (!semOk) return;
 
-  const repeatText = (repeats.length > 0)
-    ? (repeatPolicy.value === "replace"
-      ? `تم طرح أثر ${subHrs} ساعة (مواد معادة) من الرصيد السابق ثم إضافة هذا الفصل.`
-      : `تم احتساب المحاولتين معًا (بدون طرح العلامات القديمة).`)
-    : "بدون مواد معادة.";
+    const cum = calcCumulative();
+    if (!cum) return;
 
-  cumulativeMetaEl.textContent =
-    `الدمج: ${pHrs} ساعة سابقة + ${cHrs} ساعة لهذا الفصل. ${repeatText} (التقدير للمعلومة: ${getArabicGradeLabel(newAvg)})`;
-}
+    // بيانات الفصل التفصيلية
+    const sem = getSemesterComputation();
 
-// Wire events
-addCourseBtn.addEventListener("click", () => addCourseRow());
-calcSemesterBtn.addEventListener("click", () => computeSemester(true));
-useSemesterBtn.addEventListener("click", useSemesterResult);
-calcCumulativeBtn.addEventListener("click", computeCumulative);
-addRepeatBtn.addEventListener("click", () => addRepeatRow());
+    const semLabel = gradeLabel(sem.avg);
+    const cumLabel = gradeLabel(cum.newAvg);
 
-// Starter rows
-addCourseRow();
-addCourseRow();
+    // QR
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(SITE_URL)}`;
+    qrImg.src = qrUrl;
+
+    // Header meta
+    const now = new Date();
+    const dateStr = now.toLocaleDateString("ar-PS", { year:"numeric", month:"2-digit", day:"2-digit" });
+    certMeta.textContent = `تاريخ الإصدار: ${dateStr} • النظام: 100 • URL: ${SITE_URL}`;
+
+    // Stamp: يعتمد على التراكمي (الأهم)
+    stamp.className = `stamp ${stampClass(cumLabel)}`;
+    stampGrade.textContent = cumLabel;
+
+    // Print summary
+    pSemesterAvg.textContent = fmt(sem.avg);
+    pSemesterGrade.textContent = `التقدير: ${semLabel}`;
+    pSemesterHours.textContent = fmt(sem.hours, 1);
+
+    pCumulativeAvg.textContent = fmt(cum.newAvg);
+    pCumulativeGrade.textContent = `التقدير: ${cumLabel}`;
+
+    // Notes
+    if (cum.policy === "replace" && cum.repeats.length){
+      pNotes.textContent = `تم تطبيق استبدال المواد المُعادة (${cum.repeats.length})`;
+    } else if (cum.policy === "both" && cum.repeats.length){
+      pNotes.textContent = `تم اختيار احتساب المحاولتين (لم يتم حذف أثر القديم)`;
+    } else {
+      pNotes.textContent = `بدون مواد مُعادة`;
+    }
+
+    // Courses table
+    pCoursesBody.innerHTML = "";
+    for (const it of sem.items){
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${escapeHtml(it.name)}</td>
+        <td>${fmt(it.grade)}</td>
+        <td>${fmt(it.credits,1)}</td>
+        <td>${fmt(it.points,2)}</td>
+      `;
+      pCoursesBody.appendChild(tr);
+    }
+
+    pTotalHours.textContent = fmt(sem.hours, 1);
+    pTotalPoints.textContent = fmt(sem.points, 2);
+
+    printUrl.textContent = SITE_URL;
+    printDate.textContent = `Printed: ${now.toLocaleString("en-GB")}`;
+  }
+
+  function escapeHtml(s){
+    return String(s)
+      .replaceAll("&","&amp;")
+      .replaceAll("<","&lt;")
+      .replaceAll(">","&gt;")
+      .replaceAll('"',"&quot;")
+      .replaceAll("'","&#039;");
+  }
+
+  // ===== Events =====
+  addCourseBtn.addEventListener("click", () => addCourseRow());
+  calcSemesterBtn.addEventListener("click", calcSemester);
+
+  useSemesterBtn.addEventListener("click", fillFromSemester);
+  calcCumulativeBtn.addEventListener("click", () => calcCumulative());
+
+  addRepeatBtn.addEventListener("click", () => addRepeatRow());
+
+  printCertBtn.addEventListener("click", () => {
+    try{
+      buildPrintCertificate();
+      // اطبع بعد تجهيز الـ QR
+      setTimeout(() => window.print(), 250);
+    } catch (e){
+      alert("تأكد من إدخال البيانات بشكل صحيح قبل الطباعة.");
+    }
+  });
+
+  // ===== Init =====
+  // 4 صفوف جاهزة كبداية
+  addCourseRow();
+  addCourseRow();
+  addCourseRow();
+  addCourseRow();
+
+  // صف واحد للمواد المُعادة (اختياري) — تقدر تحذفه
+  // addRepeatRow();
+})();
