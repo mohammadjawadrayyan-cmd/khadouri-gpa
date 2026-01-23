@@ -16,6 +16,8 @@ const prevHoursEl = $("#prevHours");
 const cumulativeAvgEl = $("#cumulativeAvg");
 const cumulativeMetaEl = $("#cumulativeMeta");
 
+const congratsBox = $("#congratsBox");
+
 const addCourseBtn = $("#addCourseBtn");
 const calcSemesterBtn = $("#calcSemesterBtn");
 const useSemesterBtn = $("#useSemesterBtn");
@@ -30,6 +32,7 @@ function hideAlert(){
   alertBox.hidden = true;
   alertBox.textContent = "";
 }
+function hideCongrats(){ congratsBox.hidden = true; }
 
 function toNum(v){
   const n = Number(v);
@@ -116,22 +119,16 @@ function buildCertificateData(){
   const prevHours = toNum(prevHoursEl.value);
 
   const now = new Date();
-  const dateStr = now.toLocaleDateString("ar-PS", { year:"numeric", month:"2-digit", day:"2-digit" });
 
   let cumulative = null;
-
   if (Number.isFinite(prevAvg) && Number.isFinite(prevHours) && prevHours >= 0){
     cumulative = calcCumulativeFromCourses(courses, prevAvg, prevHours);
   }
 
   return {
-    site: "PTUK - Khadouri GPA",
-    date: dateStr,
+    dateISO: now.toISOString(),
     url: "https://mohammadjawadrayyan-cmd.github.io/khadouri-gpa/",
-    prev: {
-      avg: Number.isFinite(prevAvg) ? prevAvg : null,
-      hours: Number.isFinite(prevHours) ? prevHours : null
-    },
+    prev: { avg: Number.isFinite(prevAvg) ? prevAvg : null, hours: Number.isFinite(prevHours) ? prevHours : null },
     semester: sem.ok ? {
       avg: round2(sem.avg),
       hours: round2(sem.hours),
@@ -141,21 +138,18 @@ function buildCertificateData(){
     courses: courses
       .filter(c => Number.isFinite(c.grade) && Number.isFinite(c.credits) && c.credits > 0)
       .map(c => ({
-        name: c.name || "مادة",
+        name: c.name || "Course",
         grade: round2(c.grade),
         credits: round2(c.credits),
         repeat: !!c.repeat,
         oldgrade: Number.isFinite(c.oldgrade) ? round2(c.oldgrade) : null,
-        status: (c.grade >= 60 ? "ناجح" : "راسب")
+        status: (c.grade >= 60 ? "Pass" : "Fail")
       }))
   };
 }
 
 function calcCumulativeFromCourses(courses, prevAvg, prevHours){
-  // طريقة الاستبدال فقط:
-  // prevPoints = prevAvg * prevHours
-  // غير المعاد: نضيف grade*credits و نضيف credits للساعات
-  // المعاد: نضيف (grade - oldgrade)*credits و لا نضيف ساعات (لأنه محسوب سابقاً)
+  // الاستبدال فقط:
   let prevPoints = prevAvg * prevHours;
   let totalHours = prevHours;
 
@@ -165,25 +159,19 @@ function calcCumulativeFromCourses(courses, prevAvg, prevHours){
 
     if (c.repeat){
       if (!Number.isFinite(c.oldgrade)){
-        return {
-          ok:false,
-          msg:`في مادة معلّمها "مُعادة؟" لكن بدون "العلامة السابقة". اكتب العلامة السابقة عشان نحسب التراكمي صح.`
-        };
+        return { ok:false, msg:`في مادة معلّمها "مُعادة؟" لكن بدون "العلامة السابقة". اكتب العلامة السابقة.` };
       }
       if (c.oldgrade < 0 || c.oldgrade > 100){
         return { ok:false, msg:`العلامة السابقة لازم تكون بين 0 و 100.` };
       }
       prevPoints += (c.grade - c.oldgrade) * c.credits;
-      // totalHours لا تتغير
     } else {
       prevPoints += c.grade * c.credits;
       totalHours += c.credits;
     }
   }
 
-  if (totalHours <= 0){
-    return { ok:false, msg:"الساعات الإجمالية طلعت 0. تأكد من إدخالاتك." };
-  }
+  if (totalHours <= 0) return { ok:false, msg:"الساعات الإجمالية طلعت 0. تأكد من إدخالاتك." };
 
   const newAvg = prevPoints / totalHours;
   return {
@@ -197,12 +185,11 @@ function calcCumulativeFromCourses(courses, prevAvg, prevHours){
 }
 
 /* Events */
-addCourseBtn.addEventListener("click", () => {
-  addCourseRow();
-});
+addCourseBtn.addEventListener("click", () => addCourseRow());
 
 calcSemesterBtn.addEventListener("click", () => {
-  hideAlert();
+  hideAlert(); hideCongrats();
+
   const courses = readCourses();
   const sem = calcSemester(courses);
 
@@ -218,30 +205,28 @@ calcSemesterBtn.addEventListener("click", () => {
   semesterHoursEl.textContent = round2(sem.hours).toFixed(1).replace(".0","");
   semesterGradeEl.textContent = gradeLabel(sem.avg);
 
-  // نخزن آخر نتائج للفصل
-  const data = buildCertificateData();
-  localStorage.setItem("khadouri_gpa_data", JSON.stringify(data));
+  localStorage.setItem("khadouri_gpa_data", JSON.stringify(buildCertificateData()));
 });
 
 useSemesterBtn.addEventListener("click", () => {
-  hideAlert();
+  hideAlert(); hideCongrats();
+
   const courses = readCourses();
   const sem = calcSemester(courses);
   if (!sem.ok){
     showAlert("احسب المعدل الفصلي أولاً (أو أدخل مواد الفصل) ثم اضغط استخدام نتيجة الفصل.");
     return;
   }
-  // ما في خانات currAvg/currHours بهذا الإصدار—بس نخزن ونجهّز للطباعة
+
   semesterAvgEl.textContent = round2(sem.avg).toFixed(2);
   semesterHoursEl.textContent = round2(sem.hours).toFixed(1).replace(".0","");
   semesterGradeEl.textContent = gradeLabel(sem.avg);
 
-  const data = buildCertificateData();
-  localStorage.setItem("khadouri_gpa_data", JSON.stringify(data));
+  localStorage.setItem("khadouri_gpa_data", JSON.stringify(buildCertificateData()));
 });
 
 calcCumulativeBtn.addEventListener("click", () => {
-  hideAlert();
+  hideAlert(); hideCongrats();
 
   const prevAvg = toNum(prevAvgEl.value);
   const prevHours = toNum(prevHoursEl.value);
@@ -275,13 +260,15 @@ calcCumulativeBtn.addEventListener("click", () => {
   }
 
   cumulativeAvgEl.textContent = cum.avg.toFixed(2);
-  const msg = cum.improved
-    ? `مبروك! لقد تحسن معدلك التراكمي (+${cum.delta.toFixed(2)}).`
-    : `التقدير: ${cum.label} — (فرق: ${cum.delta.toFixed(2)})`;
 
-  cumulativeMetaEl.textContent = `إجمالي الساعات بعد الحساب: ${cum.hours} — ${msg}`;
+  const meta = cum.improved
+    ? `+${cum.delta.toFixed(2)} تحسّن — إجمالي الساعات: ${cum.hours}`
+    : `فرق: ${cum.delta.toFixed(2)} — إجمالي الساعات: ${cum.hours} — ${cum.label}`;
 
-  // خزّن للطباعة
+  cumulativeMetaEl.textContent = meta;
+
+  if (cum.improved) congratsBox.hidden = false;
+
   const data = buildCertificateData();
   data.cumulative = cum;
   localStorage.setItem("khadouri_gpa_data", JSON.stringify(data));
@@ -298,6 +285,5 @@ openPrintBtn.addEventListener("click", () => {
 
 /* init */
 (function init(){
-  // صفوف افتراضية أنيقة
   for (let i=0; i<4; i++) addCourseRow();
 })();
