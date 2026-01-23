@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <title>حساب المعدل التراكمي خضوري | حاسبة المعدل الفصلي والتراكمي (100)</title>
-  <meta name="description" content="حاسبة المعدل الفصلي والتراكمي لطلاب جامعة فلسطين التقنية – خضوري بنظام العلامات من 100. أدخل العلامات والساعات واحصل على المعدل مباشرة." />
+  <meta name="description" content="حاسبة المعدل الفصلي والتراكمي لطلاب جامعة فلسطين التقنية – خضوري بنظام العلامات من 100." />
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="https://mohammadjawadrayyan-cmd.github.io/khadouri-gpa/" />
 
@@ -20,19 +20,6 @@
   <meta name="twitter:description" content="حاسبة المعدل الفصلي والتراكمي لطلاب خضوري بنظام 100." />
 
   <link rel="stylesheet" href="styles.css" />
-
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "حاسبة المعدل - جامعة فلسطين التقنية خضوري",
-    "applicationCategory": "EducationalApplication",
-    "operatingSystem": "All",
-    "inLanguage": "ar",
-    "url": "https://mohammadjawadrayyan-cmd.github.io/khadouri-gpa/",
-    "description": "حاسبة للمعدل الفصلي والتراكمي لطلاب جامعة فلسطين التقنية – خضوري بنظام العلامات من 100."
-  }
-  </script>
 </head>
 
 <body>
@@ -40,19 +27,21 @@
     <div class="topbar__inner container">
       <div class="brand">
         <div class="brand__mark" aria-hidden="true">
-          <div class="ptuk-badge">
-            <span class="ptuk-badge__t">PTUK</span>
-          </div>
+          <div class="ptuk-badge"><span class="ptuk-badge__t">PTUK</span></div>
         </div>
+
         <div class="brand__text">
           <h1 class="brand__title">حساب المعدل التراكمي خضوري</h1>
-          <p class="brand__subtitle">حاسبة المعدل الفصلي والتراكمي — جامعة فلسطين التقنية – خضوري (نظام 100)</p>
+          <p class="brand__subtitle">
+            حاسبة المعدل الفصلي والتراكمي — <span class="uni">جامعة فلسطين التقنية – خضوري</span>
+          </p>
         </div>
       </div>
 
       <div class="topbar__right">
-        <div class="chip">النظام: علامات مئوية من 100</div>
-        <a class="chip chip--link" href="print.html" target="_blank" rel="noopener">صفحة الطباعة</a>
+        <div class="chip">النظام: 100</div>
+        <div class="chip chip--by">By <strong>Mohammad Jawad</strong></div>
+        <a class="btn btn--cta" href="print.html" target="_blank" rel="noopener">🖨️ شهادة الطباعة</a>
       </div>
     </div>
   </header>
@@ -62,11 +51,15 @@
       <!-- الفصل -->
       <article class="card">
         <div class="card__header">
-          <h2 class="card__title">حساب المعدل الفصلي</h2>
-          <p class="card__desc">
-            أدخل علامة كل مادة (0–100) وعدد ساعاتها.
-            <span class="muted">إذا المادة مُعادة: فعِّل (مُعادة؟) واكتب العلامة السابقة.</span>
-          </p>
+          <div class="headerRow">
+            <h2 class="card__title">حساب المعدل الفصلي</h2>
+            <div class="miniNote">
+              <span class="dot"></span>
+              <span><strong>الإعادة:</strong> فعِّل “مُعادة؟” واكتب العلامة السابقة (للتراكمي فقط).</span>
+            </div>
+          </div>
+
+          <p class="card__desc">أدخل علامة كل مادة (0–100) وعدد ساعاتها، وسيتم حساب المعدل الفصلي كنسبة مئوية.</p>
         </div>
 
         <div class="table">
@@ -99,12 +92,6 @@
             <div class="metric__value" id="semesterHours">—</div>
             <div class="metric__sub">Semester Hours</div>
           </div>
-          <div class="metric metric--wide">
-            <div class="metric__label">ملاحظة سريعة</div>
-            <div class="metric__value metric__value--small">
-              المواد المُعادة تؤثر على <strong>التراكمي</strong> إذا كانت علامتها القديمة ما زالت محسوبة ضمن المعدل السابق.
-            </div>
-          </div>
         </div>
       </article>
 
@@ -112,10 +99,7 @@
       <article class="card">
         <div class="card__header">
           <h2 class="card__title">حساب المعدل التراكمي</h2>
-          <p class="card__desc">
-            أدخل <strong>معدلك التراكمي السابق</strong> و<strong>ساعاتك السابقة</strong>.
-            وبعدين احسب—والنظام سيأخذ مواد هذا الفصل (ومنها المُعاد) بشكل صحيح.
-          </p>
+          <p class="card__desc">أدخل معدلك التراكمي السابق وساعاتك السابقة، ثم احسب التراكمي الجديد.</p>
         </div>
 
         <div class="form">
@@ -138,6 +122,10 @@
             <button id="calcCumulativeBtn" class="btn" type="button">احسب المعدل التراكمي</button>
           </div>
 
+          <div id="congratsBox" class="congrats" hidden>
+            🎉 مبروك! لقد تحسن معدلك التراكمي — استمر!
+          </div>
+
           <div class="results results--single">
             <div class="metric metric--wide">
               <div class="metric__label">المعدل التراكمي الجديد</div>
@@ -147,12 +135,9 @@
           </div>
 
           <div class="printbar">
-            <button id="openPrintBtn" class="btn btn--ghost" type="button">فتح شهادة الطباعة (صفحة جديدة)</button>
-          </div>
-
-          <div class="note">
-            <strong>كيف بنحسب الإعادة؟</strong>
-            إذا المادة مُعادة وكتبت علامتها السابقة: بنعمل <em>استبدال</em> (نطرح أثر القديمة ونضيف الجديدة) بدون “احتساب المحاولتين”.
+            <button id="openPrintBtn" class="btn btn--ghost btn--print" type="button">
+              🖨️ فتح شهادة الطباعة (صفحة جديدة)
+            </button>
           </div>
         </div>
       </article>
