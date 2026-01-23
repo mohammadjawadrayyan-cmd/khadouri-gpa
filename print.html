@@ -3,151 +3,169 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>شهادة المعدل — PTUK</title>
+  <title>Print Certificate | شهادة الطباعة</title>
+
+  <!-- IMPORTANT: noindex for print page -->
   <meta name="robots" content="noindex, nofollow" />
+  <link rel="canonical" href="https://mohammadjawadrayyan-cmd.github.io/khadouri-gpa/" />
+
   <link rel="stylesheet" href="print.css" />
 </head>
 <body>
-  <div class="page">
-    <div class="actions noprint">
-      <button id="btnPrint">طباعة</button>
-      <a href="index.html">رجوع</a>
+  <header class="pbar">
+    <div class="pbar__inner">
+      <div class="pbar__actions">
+        <a class="btn" href="index.html">رجوع / Back</a>
+        <button class="btn btn--primary" onclick="window.print()">طباعة / Print</button>
+      </div>
     </div>
+  </header>
 
-    <header class="head">
-      <div class="logo">
-        <div class="badge"><span>PTUK</span></div>
-        <div class="titles">
-          <div class="t1">Palestine Technical University – Kadoorie</div>
-          <div class="t2">جامعة فلسطين التقنية – خضوري</div>
-        </div>
+  <main class="sheet">
+    <section class="head">
+      <div class="logo">PTUK</div>
+      <div class="head__text">
+        <div class="uniEn">Palestine Technical University – Kadoorie</div>
+        <div class="uniAr">جامعة فلسطين التقنية – خضوري</div>
       </div>
 
       <div class="meta">
-        <div class="meta__row"><span>التاريخ</span><strong id="pDate">—</strong></div>
-        <div class="meta__row"><span>التقرير</span><strong>شهادة المعدل</strong></div>
+        <div class="meta__label">Date</div>
+        <div class="meta__value" id="dateEn">—</div>
+        <div class="meta__label">Report</div>
+        <div class="meta__value">GPA Certificate</div>
       </div>
-    </header>
-
-    <section class="box">
-      <h1 class="h1">شهادة حساب المعدل</h1>
-      <p class="sub">هذه الشهادة تُظهر مواد الفصل والمعدل الفصلي والتراكمي (نظام 100).</p>
     </section>
 
-    <section class="box">
-      <h2 class="h2">جدول المواد</h2>
-      <div class="table">
-        <div class="thead">
-          <div>اسم المادة</div>
-          <div class="c">الساعات</div>
-          <div class="c">العلامة</div>
-          <div class="c">النتيجة</div>
-          <div class="c">مُعادة؟</div>
+    <section class="titleBox">
+      <h1>شهادة حساب المعدل</h1>
+      <p>هذه الشهادة تُظهر مواد الفصل، والمعدل الفصلي والتراكمي (نظام 100).</p>
+    </section>
+
+    <section class="card">
+      <h2>جدول المواد / Courses</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>اسم المادة<br><span>Course</span></th>
+            <th>الساعات<br><span>Credits</span></th>
+            <th>العلامة<br><span>Grade</span></th>
+            <th>النتيجة<br><span>Result</span></th>
+            <th>معادة؟<br><span>Repeated?</span></th>
+            <th id="oldTh">العلامة السابقة<br><span>Old grade</span></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </section>
+
+    <section class="stats">
+      <div class="stat">
+        <div class="stat__label">المعدل الفصلي<br><span>Semester GPA</span></div>
+        <div class="stat__value" id="semAvg">—</div>
+        <div class="stat__sub">
+          <span class="k">ساعات الفصل:</span> <span id="semH">—</span>
+          <span class="sep">•</span>
+          <span class="k">التقدير:</span> <span id="semG">—</span>
         </div>
-        <div id="pRows" class="tbody"></div>
-      </div>
-    </section>
-
-    <section class="grid">
-      <div class="box box--strong">
-        <h2 class="h2">المعدل الفصلي</h2>
-        <div class="big" id="pSemAvg">—</div>
-        <div class="metaLine" id="pSemHours">—</div>
-        <div class="metaLine" id="pSemGrade">—</div>
       </div>
 
-      <div class="box box--strong">
-        <h2 class="h2">المعدل التراكمي</h2>
-        <div class="big" id="pCumAvg">—</div>
-        <div class="metaLine" id="pCumHours">—</div>
-        <div class="metaLine" id="pCumGrade">—</div>
-        <div id="pCongrats" class="congrats" hidden>🎉 مبروك! لقد تحسن معدلك التراكمي</div>
+      <div class="stat">
+        <div class="stat__label">المعدل التراكمي<br><span>Cumulative GPA</span></div>
+        <div class="stat__value" id="cumAvg">—</div>
+        <div class="stat__sub">
+          <span class="k">إجمالي الساعات:</span> <span id="cumH">—</span>
+          <span class="sep">•</span>
+          <span class="k">التقدير:</span> <span id="cumG">—</span>
+        </div>
       </div>
     </section>
 
     <footer class="foot">
-      <div class="copy">
-        © Mohammad Jawad. All rights reserved.
-        <div class="url">https://mohammadjawadrayyan-cmd.github.io/khadouri-gpa/</div>
-      </div>
+      <div>© <span id="yearNow"></span> Mohammad Jawad. All rights reserved.</div>
     </footer>
-  </div>
+  </main>
 
   <script>
-    const $ = (s) => document.querySelector(s);
+    const STORAGE_KEY = "kgpa:lastReport";
 
-    function esc(str){
-      return String(str)
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;");
+    function gradeLabel(avg){
+      if(avg >= 90) return {ar:"ممتاز", en:"Excellent"};
+      if(avg >= 80) return {ar:"جيد جداً", en:"Very Good"};
+      if(avg >= 70) return {ar:"جيد", en:"Good"};
+      if(avg >= 60) return {ar:"مقبول", en:"Pass"};
+      return {ar:"راسب", en:"Fail"};
     }
 
-    function load(){
-      const raw = localStorage.getItem("khadouri_gpa_data");
-      if(!raw){
-        $("#pRows").innerHTML = '<div class="empty">لا توجد بيانات للطباعة. ارجع واحسب أولاً.</div>';
+    function fmtNum(x){
+      if(x == null || !Number.isFinite(x)) return "—";
+      return (Math.round(x*100)/100).toFixed(2).replace(/\.00$/,"");
+    }
+
+    function init(){
+      document.getElementById("yearNow").textContent = new Date().getFullYear();
+      const reportRaw = localStorage.getItem(STORAGE_KEY);
+      if(!reportRaw){
+        document.getElementById("tbody").innerHTML = "<tr><td colspan='6'>لا يوجد بيانات للطباعة. ارجع واحسب المعدل أولاً.</td></tr>";
         return;
       }
+      const report = JSON.parse(reportRaw);
 
-      let data;
-      try{ data = JSON.parse(raw); }catch(e){
-        $("#pRows").innerHTML = '<div class="empty">بيانات غير صالحة. احسب من جديد.</div>';
-        return;
+      // Date in ENGLISH ONLY
+      const d = new Date(report.createdAt || Date.now());
+      const dateEn = new Intl.DateTimeFormat("en-US", { year:"numeric", month:"long", day:"numeric" }).format(d);
+      document.getElementById("dateEn").textContent = dateEn;
+
+      const tbody = document.getElementById("tbody");
+      tbody.innerHTML = "";
+
+      const hasOld = report.courses.some(c=>c.repeated);
+      if(!hasOld){
+        document.getElementById("oldTh").style.display = "none";
       }
 
-      // التاريخ فقط بالإنجليزي
-      try{
-        const d = new Date(data.dateISO || Date.now());
-        $("#pDate").textContent = d.toLocaleDateString("en-GB", { year:"numeric", month:"long", day:"2-digit" });
-      }catch{
-        $("#pDate").textContent = "—";
-      }
+      report.courses.forEach(c=>{
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${escapeHtml(c.name || "")}</td>
+          <td>${fmtNum(c.credits)}</td>
+          <td>${fmtNum(c.grade)}</td>
+          <td><span class="${c.grade>=60 ? "ok":"bad"}">${escapeHtml(c.passAr)} / ${escapeHtml(c.passEn)}</span></td>
+          <td>${c.repeated ? "نعم / Yes" : "لا / No"}</td>
+          <td class="old">${c.repeated ? fmtNum(c.oldGrade) : "—"}</td>
+        `;
+        if(!hasOld){
+          tr.querySelector(".old").style.display = "none";
+        }
+        tbody.appendChild(tr);
+      });
 
-      // الجدول (ألوان غامقة بالـ CSS)
-      const rows = Array.isArray(data.courses) ? data.courses : [];
-      if(rows.length === 0){
-        $("#pRows").innerHTML = '<div class="empty">لا توجد مواد.</div>';
-      } else {
-        $("#pRows").innerHTML = rows.map(r => {
-          const rep = r.repeat ? "نعم" : "لا";
-          const status = r.status || (r.grade >= 60 ? "Pass" : "Fail");
-          const arStatus = (status === "Fail") ? "راسب" : "ناجح";
-          return `
-            <div class="trow">
-              <div>${esc(r.name)}</div>
-              <div class="c">${esc(r.credits)}</div>
-              <div class="c">${esc(r.grade)}</div>
-              <div class="c ${arStatus === "راسب" ? "bad": "good"}">${arStatus}</div>
-              <div class="c">${rep}</div>
-            </div>
-          `;
-        }).join("");
-      }
+      const semAvg = report.semesterAvg;
+      const semH = report.semesterHours;
+      const cumAvg = report.cumulativeAvg;
 
-      // الفصلي
-      if(data.semester){
-        $("#pSemAvg").textContent = (data.semester.avg ?? "—");
-        $("#pSemHours").textContent = `عدد ساعات الفصل: ${data.semester.hours ?? "—"}`;
-        $("#pSemGrade").textContent = `التقدير: ${data.semester.label ?? "—"}`;
-      }
+      document.getElementById("semAvg").textContent = fmtNum(semAvg);
+      document.getElementById("semH").textContent = fmtNum(semH);
+      const sg = (semAvg!=null && Number.isFinite(semAvg)) ? gradeLabel(semAvg) : null;
+      document.getElementById("semG").textContent = sg ? `${sg.ar} (${sg.en})` : "—";
 
-      // التراكمي
-      if(data.cumulative && data.cumulative.ok){
-        $("#pCumAvg").textContent = data.cumulative.avg ?? "—";
-        $("#pCumHours").textContent = `إجمالي الساعات: ${data.cumulative.hours ?? "—"}`;
-        $("#pCumGrade").textContent = `التقدير: ${data.cumulative.label ?? "—"}`;
-        if(data.cumulative.improved) $("#pCongrats").hidden = false;
-      } else {
-        $("#pCumAvg").textContent = "—";
-        $("#pCumHours").textContent = "إجمالي الساعات: —";
-        $("#pCumGrade").textContent = "التقدير: —";
+      if(cumAvg != null && Number.isFinite(cumAvg)){
+        document.getElementById("cumAvg").textContent = fmtNum(cumAvg);
+        document.getElementById("cumH").textContent = fmtNum(report.cumulativeHours);
+        const cg = gradeLabel(cumAvg);
+        document.getElementById("cumG").textContent = `${cg.ar} (${cg.en})`;
+      }else{
+        document.getElementById("cumAvg").textContent = "—";
+        document.getElementById("cumH").textContent = "—";
+        document.getElementById("cumG").textContent = "—";
       }
     }
 
-    $("#btnPrint").addEventListener("click", () => window.print());
-    load();
+    function escapeHtml(s){
+      return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    init();
   </script>
 </body>
 </html>
