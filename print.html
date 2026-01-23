@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>شهادة المعدل — PTUK</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="stylesheet" href="print.css" />
+</head>
+<body>
+  <div class="page">
+    <div class="actions noprint">
+      <button id="btnPrint">طباعة</button>
+      <a href="index.html">رجوع للموقع</a>
+    </div>
+
+    <header class="head">
+      <div class="logo">
+        <div class="badge"><span>PTUK</span></div>
+        <div class="titles">
+          <div class="t1">Palestine Technical University – Kadoorie</div>
+          <div class="t2">جامعة فلسطين التقنية – خضوري</div>
+        </div>
+      </div>
+
+      <div class="meta">
+        <div class="meta__row"><span>التاريخ</span><strong id="pDate">—</strong></div>
+        <div class="meta__row"><span>الموقع</span><strong>khadouri-gpa</strong></div>
+      </div>
+    </header>
+
+    <section class="box">
+      <h1 class="h1">شهادة حساب المعدل</h1>
+      <p class="sub">
+        هذه الشهادة تُظهر تفاصيل مواد الفصل والمعدل الفصلي والتراكمي (نظام 100).
+      </p>
+    </section>
+
+    <section class="box">
+      <h2 class="h2">مواد الفصل</h2>
+      <div class="table">
+        <div class="thead">
+          <div>اسم المادة</div>
+          <div class="c">الساعات</div>
+          <div class="c">العلامة</div>
+          <div class="c">النتيجة</div>
+          <div class="c">مُعادة؟</div>
+        </div>
+        <div id="pRows" class="tbody"></div>
+      </div>
+      <div class="hint">
+        * المادة المُعادة يتم احتسابها بطريقة الاستبدال إذا كانت العلامة السابقة محسوبة ضمن التراكمي السابق.
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="box">
+        <h2 class="h2">معدل الفصل الحالي</h2>
+        <div class="big" id="pSemAvg">—</div>
+        <div class="mini" id="pSemMeta">—</div>
+      </div>
+
+      <div class="box">
+        <h2 class="h2">المعدل التراكمي</h2>
+        <div class="big" id="pCumAvg">—</div>
+        <div class="mini" id="pCumMeta">—</div>
+        <div id="pCongrats" class="congrats" hidden>مبروك! لقد تحسن معدلك التراكمي 🎉</div>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <div class="sign">
+        <div class="line"></div>
+        <div class="name">Mohammad Jawad</div>
+        <div class="role">Signature</div>
+      </div>
+
+      <div class="copy">
+        © Mohammad Jawad. All rights reserved.
+        <div class="url">https://mohammadjawadrayyan-cmd.github.io/khadouri-gpa/</div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const $ = (s) => document.querySelector(s);
+
+    function esc(str){
+      return String(str)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;");
+    }
+
+    function load(){
+      const raw = localStorage.getItem("khadouri_gpa_data");
+      if(!raw){
+        $("#pRows").innerHTML = '<div class="empty">لا توجد بيانات للطباعة. ارجع للموقع واحسب المعدل أولاً.</div>';
+        return;
+      }
+
+      let data;
+      try{ data = JSON.parse(raw); }catch(e){
+        $("#pRows").innerHTML = '<div class="empty">بيانات الطباعة تالفة. احسب من جديد.</div>';
+        return;
+      }
+
+      $("#pDate").textContent = data.date || "—";
+
+      // Rows
+      const rows = Array.isArray(data.courses) ? data.courses : [];
+      if(rows.length === 0){
+        $("#pRows").innerHTML = '<div class="empty">لا توجد مواد.</div>';
+      } else {
+        $("#pRows").innerHTML = rows.map(r => {
+          const rep = r.repeat ? "نعم" : "لا";
+          const status = r.status || (r.grade >= 60 ? "ناجح" : "راسب");
+          return `
+            <div class="trow">
+              <div>${esc(r.name)}</div>
+              <div class="c">${esc(r.credits)}</div>
+              <div class="c">${esc(r.grade)}</div>
+              <div class="c ${status === "راسب" ? "bad": "good"}">${esc(status)}</div>
+              <div class="c">${rep}</div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      // Semester
+      if(data.semester){
+        $("#pSemAvg").textContent = (data.semester.avg ?? "—");
+        $("#pSemMeta").textContent = `إجمالي ساعات الفصل: ${data.semester.hours ?? "—"} — ${data.semester.label ?? ""}`;
+      }
+
+      // Cumulative
+      if(data.cumulative && data.cumulative.ok){
+        $("#pCumAvg").textContent = data.cumulative.avg ?? "—";
+        $("#pCumMeta").textContent = `Total Hours: ${data.cumulative.hours ?? "—"} — ${data.cumulative.label ?? ""}`;
+        if(data.cumulative.improved) $("#pCongrats").hidden = false;
+      } else {
+        $("#pCumAvg").textContent = "—";
+        $("#pCumMeta").textContent = "لم يتم حساب التراكمي.";
+      }
+    }
+
+    $("#btnPrint").addEventListener("click", () => window.print());
+    load();
+  </script>
+</body>
+</html>
