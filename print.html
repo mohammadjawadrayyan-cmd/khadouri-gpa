@@ -1,17 +1,17 @@
 <!doctype html>
-<html lang="en" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>GPA Certificate — PTUK</title>
+  <title>شهادة المعدل — PTUK</title>
   <meta name="robots" content="noindex, nofollow" />
   <link rel="stylesheet" href="print.css" />
 </head>
 <body>
   <div class="page">
     <div class="actions noprint">
-      <button id="btnPrint">Print</button>
-      <a href="index.html">Back</a>
+      <button id="btnPrint">طباعة</button>
+      <a href="index.html">رجوع</a>
     </div>
 
     <header class="head">
@@ -24,42 +24,44 @@
       </div>
 
       <div class="meta">
-        <div class="meta__row"><span>Date</span><strong id="pDate">—</strong></div>
-        <div class="meta__row"><span>Report</span><strong>GPA Certificate</strong></div>
+        <div class="meta__row"><span>التاريخ</span><strong id="pDate">—</strong></div>
+        <div class="meta__row"><span>التقرير</span><strong>شهادة المعدل</strong></div>
       </div>
     </header>
 
     <section class="box">
-      <h1 class="h1">GPA Certificate</h1>
-      <p class="sub">This certificate shows your semester courses and GPA results (0–100 system).</p>
+      <h1 class="h1">شهادة حساب المعدل</h1>
+      <p class="sub">هذه الشهادة تُظهر مواد الفصل والمعدل الفصلي والتراكمي (نظام 100).</p>
     </section>
 
     <section class="box">
-      <h2 class="h2">Semester Courses</h2>
+      <h2 class="h2">جدول المواد</h2>
       <div class="table">
         <div class="thead">
-          <div>Course</div>
-          <div class="c">Credits</div>
-          <div class="c">Grade</div>
-          <div class="c">Result</div>
-          <div class="c">Repeated</div>
+          <div>اسم المادة</div>
+          <div class="c">الساعات</div>
+          <div class="c">العلامة</div>
+          <div class="c">النتيجة</div>
+          <div class="c">مُعادة؟</div>
         </div>
         <div id="pRows" class="tbody"></div>
       </div>
     </section>
 
     <section class="grid">
-      <div class="box">
-        <h2 class="h2">Semester GPA</h2>
+      <div class="box box--strong">
+        <h2 class="h2">المعدل الفصلي</h2>
         <div class="big" id="pSemAvg">—</div>
-        <div class="mini" id="pSemMeta">—</div>
+        <div class="metaLine" id="pSemHours">—</div>
+        <div class="metaLine" id="pSemGrade">—</div>
       </div>
 
-      <div class="box">
-        <h2 class="h2">Cumulative GPA</h2>
+      <div class="box box--strong">
+        <h2 class="h2">المعدل التراكمي</h2>
         <div class="big" id="pCumAvg">—</div>
-        <div class="mini" id="pCumMeta">—</div>
-        <div id="pCongrats" class="congrats" hidden>Congratulations! Your cumulative GPA improved 🎉</div>
+        <div class="metaLine" id="pCumHours">—</div>
+        <div class="metaLine" id="pCumGrade">—</div>
+        <div id="pCongrats" class="congrats" hidden>🎉 مبروك! لقد تحسن معدلك التراكمي</div>
       </div>
     </section>
 
@@ -85,17 +87,17 @@
     function load(){
       const raw = localStorage.getItem("khadouri_gpa_data");
       if(!raw){
-        $("#pRows").innerHTML = '<div class="empty">No data to print. Go back and calculate first.</div>';
+        $("#pRows").innerHTML = '<div class="empty">لا توجد بيانات للطباعة. ارجع واحسب أولاً.</div>';
         return;
       }
 
       let data;
       try{ data = JSON.parse(raw); }catch(e){
-        $("#pRows").innerHTML = '<div class="empty">Invalid data. Please recalculate.</div>';
+        $("#pRows").innerHTML = '<div class="empty">بيانات غير صالحة. احسب من جديد.</div>';
         return;
       }
 
-      // Date in English
+      // التاريخ فقط بالإنجليزي
       try{
         const d = new Date(data.dateISO || Date.now());
         $("#pDate").textContent = d.toLocaleDateString("en-GB", { year:"numeric", month:"long", day:"2-digit" });
@@ -103,40 +105,44 @@
         $("#pDate").textContent = "—";
       }
 
-      // Rows
+      // الجدول (ألوان غامقة بالـ CSS)
       const rows = Array.isArray(data.courses) ? data.courses : [];
       if(rows.length === 0){
-        $("#pRows").innerHTML = '<div class="empty">No courses.</div>';
+        $("#pRows").innerHTML = '<div class="empty">لا توجد مواد.</div>';
       } else {
         $("#pRows").innerHTML = rows.map(r => {
-          const rep = r.repeat ? "Yes" : "No";
+          const rep = r.repeat ? "نعم" : "لا";
           const status = r.status || (r.grade >= 60 ? "Pass" : "Fail");
+          const arStatus = (status === "Fail") ? "راسب" : "ناجح";
           return `
             <div class="trow">
               <div>${esc(r.name)}</div>
               <div class="c">${esc(r.credits)}</div>
               <div class="c">${esc(r.grade)}</div>
-              <div class="c ${status === "Fail" ? "bad": "good"}">${esc(status)}</div>
+              <div class="c ${arStatus === "راسب" ? "bad": "good"}">${arStatus}</div>
               <div class="c">${rep}</div>
             </div>
           `;
         }).join("");
       }
 
-      // Semester
+      // الفصلي
       if(data.semester){
         $("#pSemAvg").textContent = (data.semester.avg ?? "—");
-        $("#pSemMeta").textContent = `Credits: ${data.semester.hours ?? "—"} • ${data.semester.label ?? ""}`;
+        $("#pSemHours").textContent = `عدد ساعات الفصل: ${data.semester.hours ?? "—"}`;
+        $("#pSemGrade").textContent = `التقدير: ${data.semester.label ?? "—"}`;
       }
 
-      // Cumulative
+      // التراكمي
       if(data.cumulative && data.cumulative.ok){
         $("#pCumAvg").textContent = data.cumulative.avg ?? "—";
-        $("#pCumMeta").textContent = `Total Hours: ${data.cumulative.hours ?? "—"} • ${data.cumulative.label ?? ""}`;
+        $("#pCumHours").textContent = `إجمالي الساعات: ${data.cumulative.hours ?? "—"}`;
+        $("#pCumGrade").textContent = `التقدير: ${data.cumulative.label ?? "—"}`;
         if(data.cumulative.improved) $("#pCongrats").hidden = false;
       } else {
         $("#pCumAvg").textContent = "—";
-        $("#pCumMeta").textContent = "Not calculated.";
+        $("#pCumHours").textContent = "إجمالي الساعات: —";
+        $("#pCumGrade").textContent = "التقدير: —";
       }
     }
 
