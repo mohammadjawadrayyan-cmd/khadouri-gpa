@@ -1,0 +1,205 @@
+:root{
+  --ink:#0b1220;
+  --muted:#64748b;
+  --line:#e5e7eb;
+  --card:#ffffff;
+  --bg:#f3f4f6;
+  --good:#16a34a;
+  --bad:#ef4444;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, "Segoe UI", Tahoma, Arial, sans-serif;
+  color:var(--ink);
+  background: var(--bg);
+}
+
+.page{
+  width:min(920px, calc(100% - 24px));
+  margin:18px auto 26px;
+  position:relative;
+}
+
+.page::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(circle at 20px 20px, rgba(15,23,42,.04) 2px, transparent 2.5px) 0 0/40px 40px;
+  pointer-events:none;
+  z-index:-1;
+}
+
+.actions{
+  display:flex;
+  gap:10px;
+  justify-content:flex-start;
+  align-items:center;
+  margin-bottom:10px;
+}
+.actions button{
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid var(--line);
+  background: white;
+  font-weight:800;
+  cursor:pointer;
+}
+.actions a{
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid var(--line);
+  background: white;
+  text-decoration:none;
+  color:var(--ink);
+  font-weight:700;
+}
+
+.head{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:flex-start;
+  padding:14px 16px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background: rgba(255,255,255,.86);
+}
+
+.logo{display:flex; gap:12px; align-items:center}
+.badge{
+  width:52px;height:52px;border-radius:999px;
+  display:grid;place-items:center;
+  background: radial-gradient(circle at 30% 30%, rgba(14,165,233,.25), transparent 55%),
+              radial-gradient(circle at 70% 70%, rgba(22,163,74,.25), transparent 55%),
+              #0b1220;
+  color:#fff;
+  font-weight:900;
+  letter-spacing:1px;
+}
+.titles .t1{font-weight:900; font-size:14px}
+.titles .t2{color:var(--muted); font-size:12px; margin-top:4px}
+
+.meta{
+  text-align:left;
+  direction:ltr;
+  font-size:12px;
+  color:var(--muted);
+}
+.meta__row{display:flex; gap:8px; justify-content:flex-end; margin-top:4px}
+.meta strong{color:var(--ink)}
+
+.box{
+  margin-top:12px;
+  padding:14px 16px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background: rgba(255,255,255,.90);
+}
+
+.h1{margin:0;font-size:18px}
+.sub{margin:8px 0 0; color:var(--muted); font-size:13px; line-height:1.6}
+
+.h2{margin:0 0 10px; font-size:14px}
+
+.table{
+  border:1px solid var(--line);
+  border-radius:16px;
+  overflow:hidden;
+}
+.thead, .trow{
+  display:grid;
+  grid-template-columns: 1.8fr .5fr .6fr .6fr .6fr;
+  gap:10px;
+  align-items:center;
+}
+.thead{
+  background:#f8fafc;
+  padding:10px 12px;
+  font-size:12px;
+  color:#475569;
+  font-weight:800;
+}
+.tbody .trow{
+  padding:10px 12px;
+  border-top:1px solid var(--line);
+  font-size:13px;
+}
+.c{text-align:center; direction:ltr}
+.good{color:var(--good); font-weight:900}
+.bad{color:var(--bad); font-weight:900}
+.hint{margin-top:10px; font-size:12px; color:var(--muted)}
+
+.grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:12px;
+}
+@media (max-width: 720px){
+  .grid{grid-template-columns:1fr;}
+}
+
+.big{
+  font-size:34px;
+  font-weight:1000;
+  letter-spacing:.4px;
+  margin-top:6px;
+  direction:ltr;
+  text-align:center;
+}
+.mini{
+  margin-top:6px;
+  color:var(--muted);
+  font-size:12.5px;
+  line-height:1.6;
+  text-align:center;
+}
+.congrats{
+  margin-top:10px;
+  background: rgba(22,163,74,.10);
+  border:1px solid rgba(22,163,74,.20);
+  padding:10px 12px;
+  border-radius:14px;
+  color:#14532d;
+  font-weight:900;
+  text-align:center;
+}
+
+.foot{
+  margin-top:12px;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-end;
+  gap:12px;
+  padding:14px 16px;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background: rgba(255,255,255,.90);
+}
+
+.sign{width:260px}
+.line{height:1px;background:#cbd5e1;margin-bottom:8px}
+.name{font-weight:1000; direction:ltr}
+.role{color:var(--muted); font-size:12px}
+
+.copy{
+  text-align:left;
+  direction:ltr;
+  color:var(--muted);
+  font-size:12px;
+}
+.url{margin-top:6px; font-size:11px}
+
+.empty{padding:12px;color:var(--muted)}
+
+@media print{
+  body{background:#fff}
+  .page{margin:0; width:auto}
+  .noprint{display:none !important}
+  .page::before{display:none}
+  .box,.head,.foot{break-inside: avoid;}
+  @page{size:A4; margin:12mm;}
+}
