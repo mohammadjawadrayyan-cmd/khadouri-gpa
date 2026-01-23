@@ -1,95 +1,119 @@
-const LS_PAYLOAD = "ptuk_gpa_payload";
-const payloadRaw = localStorage.getItem(LS_PAYLOAD);
+(() => {
+  // حاول يقرأ من أكثر من مفتاح (عشان لو مفتاحك مختلف ما نخسر)
+  const readAny = (keys) => {
+    for (const k of keys) {
+      const raw = localStorage.getItem(k);
+      if (raw) {
+        try { return JSON.parse(raw); } catch (_) {}
+      }
+    }
+    return null;
+  };
 
-const yearNow = document.getElementById("yearNow");
-yearNow.textContent = String(new Date().getFullYear());
+  const DATA_KEYS = [
+    "ptuk_gpa_data",
+    "khadouri_gpa_data",
+    "gpa_certificate_data",
+    "certificateData"
+  ];
 
-function fmtDateEnglish(iso){
-  const d = iso ? new Date(iso) : new Date();
-  return d.toLocaleDateString("en-US", { year:"numeric", month:"long", day:"2-digit" });
-}
+  const data = readAny(DATA_KEYS) || {};
 
-function gradeLabel(score){
-  if (!Number.isFinite(score)) return "—";
-  if (score >= 90) return "Excellent";
-  if (score >= 80) return "Very Good";
-  if (score >= 70) return "Good";
-  if (score >= 60) return "Pass";
-  return "Fail";
-}
+  // عناصر
+  const elDate = document.getElementById("printDate");
+  const tbody = document.getElementById("coursesTbody");
+  const elSemAvg = document.getElementById("semesterAvg");
+  const elSemMeta = document.getElementById("semesterMeta");
+  const elCumAvg = document.getElementById("cumulativeAvg");
+  const elCumMeta = document.getElementById("cumulativeMeta");
+  const page = document.getElementById("page");
 
-function safe(n, digits=2){
-  return Number.isFinite(n) ? n.toFixed(digits) : "—";
-}
+  // تاريخ بالإنجليزي (زي ما طلبت)
+  const now = data.generatedAt ? new Date(data.generatedAt) : new Date();
+  elDate.textContent = now.toLocaleDateString("en-US", {
+    year: "numeric", month: "long", day: "numeric"
+  });
 
-function renderEmpty(){
-  document.getElementById("titleMain").textContent = "No data to print";
-  document.getElementById("titleDesc").textContent = "Go back to the calculator and open print certificate again.";
-}
+  const clampNum = (v) => {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : null;
+  };
 
-if (!payloadRaw){
-  renderEmpty();
-} else {
-  const data = JSON.parse(payloadRaw);
+  const fmt = (v, d=2) => (v === null ? "—" : Number(v).toFixed(d));
 
-  // date in ENGLISH only
-  document.getElementById("dateEn").textContent = fmtDateEnglish(data.generatedAt);
+  const ratingOf = (avg) => {
+    if (avg === null) return { ar:"—", en:"—" };
+    if (avg >= 90) return { ar:"ممتاز", en:"Excellent" };
+    if (avg >= 80) return { ar:"جيد جداً", en:"Very Good" };
+    if (avg >= 70) return { ar:"جيد", en:"Good" };
+    if (avg >= 60) return { ar:"مقبول", en:"Pass" };
+    return { ar:"راسب", en:"Fail" };
+  };
 
-  // Fill course table
-  const tbody = document.getElementById("tbody");
+  // كورسات
+  const courses = Array.isArray(data.courses) ? data.courses : [];
   tbody.innerHTML = "";
 
-  const courses = Array.isArray(data.courses) ? data.courses : [];
-  courses.forEach(c=>{
+  const makeTd = (txt, cls="") => {
+    const td = document.createElement("td");
+    td.textContent = txt;
+    if (cls) td.className = cls;
+    return td;
+  };
+
+  courses.forEach((c) => {
+    const name = (c?.name ?? "").toString().trim() || "مادة";
+    const credits = clampNum(c?.credits) ?? clampNum(c?.hours) ?? 0;
+    const grade = clampNum(c?.grade);
+    const repeated = !!c?.repeated;
+
+    const pass = (grade !== null && grade >= 60);
     const tr = document.createElement("tr");
 
-    const course = document.createElement("td");
-    course.textContent = c.name || "Course";
+    tr.appendChild(makeTd(name));
+    tr.appendChild(makeTd(credits ? String(credits) : "—"));
+    tr.appendChild(makeTd(grade === null ? "—" : String(grade)));
+    tr.appendChild(makeTd(pass ? "Pass / ناجح" : "Fail / راسب", pass ? "ok" : "bad"));
+    tr.appendChild(makeTd(repeated ? "Yes / نعم" : "No / لا"));
 
-    const credits = document.createElement("td");
-    credits.textContent = String(c.credits ?? "—");
-
-    const grade = document.createElement("td");
-    grade.textContent = String(Number.isFinite(c.grade) ? c.grade : "—");
-
-    const result = document.createElement("td");
-    const pass = Number.isFinite(c.grade) && c.grade >= 60;
-    result.textContent = pass ? "Pass / ناجح" : "Fail / راسب";
-    result.className = pass ? "pass" : "fail";
-
-    const rep = document.createElement("td");
-    rep.textContent = (c.repeated ? "Yes / نعم" : "No / لا");
-
-    tr.appendChild(course);
-    tr.appendChild(credits);
-    tr.appendChild(grade);
-    tr.appendChild(result);
-    tr.appendChild(rep);
     tbody.appendChild(tr);
   });
 
-  // Semester summary
-  const sem = data.semester || {};
-  document.getElementById("semV").textContent = safe(sem.avg, 2);
-  document.getElementById("semM").textContent =
-    `Credits: ${sem.credits ?? "—"} • Rating: ${gradeLabel(sem.avg)}`;
+  // نتائج
+  const semAvg = clampNum(data?.semester?.avg) ?? clampNum(data?.semesterAvg);
+  const semCredits = clampNum(data?.semester?.credits) ?? clampNum(data?.semesterCredits);
+  const semRating = ratingOf(semAvg);
 
-  // Cumulative summary (if exists)
-  const cum = data.cumulative;
-  if (cum && Number.isFinite(cum.avg)){
-    document.getElementById("cumV").textContent = safe(cum.avg, 2);
+  elSemAvg.textContent = (semAvg === null ? "—" : fmt(semAvg, 2));
+  elSemMeta.textContent = semCredits
+    ? `Credits: ${semCredits} • Rating: ${semRating.en} — الساعات: ${semCredits} • التقدير: ${semRating.ar}`
+    : `Rating: ${semRating.en} — التقدير: ${semRating.ar}`;
 
-    const parts = [];
-    parts.push(`Total credits: ${cum.totalHours ?? "—"}`);
-    parts.push(`Rating: ${gradeLabel(cum.avg)}`);
-    if (Number.isFinite(cum.delta)) parts.push(`Δ: ${cum.delta >= 0 ? "+" : ""}${cum.delta.toFixed(2)}`);
-    document.getElementById("cumM").textContent = parts.join(" • ");
-  } else {
-    document.getElementById("cumV").textContent = "—";
-    document.getElementById("cumM").textContent = "Compute cumulative first (optional).";
+  const cumAvg = clampNum(data?.cumulative?.avg) ?? clampNum(data?.cumulativeAvg);
+  const totalCredits = clampNum(data?.cumulative?.totalCredits) ?? clampNum(data?.totalCredits);
+  const prevAvg = clampNum(data?.cumulative?.prevAvg) ?? clampNum(data?.prevAvg);
+  const improvementFromData = clampNum(data?.cumulative?.improvement) ?? clampNum(data?.improvement);
+
+  let improvement = improvementFromData;
+  if (improvement === null && cumAvg !== null && prevAvg !== null) {
+    improvement = cumAvg - prevAvg;
   }
-}
 
-// buttons
-document.getElementById("btnBack").addEventListener("click", ()=> window.close());
-document.getElementById("btnPrint").addEventListener("click", ()=> window.print());
+  const cumRating = ratingOf(cumAvg);
+
+  elCumAvg.textContent = (cumAvg === null ? "—" : fmt(cumAvg, 2));
+
+  // ✅ هنا بدلنا Δ إلى "تحسّن / Improvement"
+  const impPart = (improvement === null)
+    ? ""
+    : ` • Improvement: ${improvement >= 0 ? "+" : ""}${fmt(improvement, 2)} — تحسّن: ${improvement >= 0 ? "+" : ""}${fmt(improvement, 2)}`;
+
+  elCumMeta.textContent = totalCredits
+    ? `Total credits: ${totalCredits} • Rating: ${cumRating.en}${impPart} — إجمالي الساعات: ${totalCredits} • التقدير: ${cumRating.ar}${impPart ? "" : ""}`
+    : `Rating: ${cumRating.en}${impPart} — التقدير: ${cumRating.ar}${impPart ? "" : ""}`;
+
+  // إذا المواد كثيرة: فعّل compact لتزيد فرصة صفحة وحدة
+  if (courses.length >= 8) {
+    page.classList.add("compact");
+  }
+})();
