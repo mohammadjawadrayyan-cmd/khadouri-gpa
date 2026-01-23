@@ -1,306 +1,296 @@
-/* Khadouri GPA — bilingual + repeats in semester + print report */
 const $ = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
 
-const STORAGE_KEY = "kgpa:lastReport";
-const LANG_KEY = "kgpa:lang";
+const LS_LANG = "ptuk_lang";
+const LS_PAYLOAD = "ptuk_gpa_payload";
 
 const I18N = {
   ar: {
-    appTitle: "حساب المعدل التراكمي خضوري",
-    appSubtitleAr: "حاسبة المعدل الفصلي والتراكمي — جامعة فلسطين التقنية – خضوري",
-    appSubtitleEn: "Semester & Cumulative Calculator — Palestine Technical University (Kadoorie)",
-    systemChip: "النظام: 100",
-    printChip: "شهادة الطباعة",
-    printChipHint: "يفتح صفحة جديدة",
+    print_cert: "شهادة الطباعة",
+    opens_new_tab: "يفتح صفحة جديدة",
+    system_100: "النظام: 100",
+    site_title: "حساب المعدل التراكمي خضوري",
+    uni_name_ar: "جامعة فلسطين التقنية – خضوري",
+    subtitle: "حاسبة المعدل الفصلي والتراكمي (نظام 100)",
+    hero_title: "حاسبة سريعة ودقيقة",
+    hero_desc: "أدخل العلامات والساعات، واحصل على المعدل الفصلي والتراكمي فورًا. (الطباعة تظهر كشهادة مرتبة)",
+    note_tip: "ملاحظة",
+    note_tip_text: "خيار الإعادة = استبدال القديمة بالجديدة (إذا كانت القديمة محسوبة ضمن السابق).",
 
-    heroTitle: "حاسبة المعدل الفصلي والتراكمي (نظام 100)",
-    heroDesc: "أدخل موادك (العلامة + الساعات) لتحصل على المعدل الفصلي، ثم احسب المعدل التراكمي بإضافة معدلك وساعاتك السابقة.",
-    heroB1: "بدون تسجيل دخول — يعمل محليًا.",
-    heroB2: "يدعم المساقات المعادة (استبدال العلامة القديمة).",
-    heroB3: "شهادة طباعة أنيقة بصفحة منفصلة.",
+    semester_title: "حساب المعدل الفصلي",
+    semester_desc: "أدخل علامة كل مادة (0–100) وعدد ساعاتها. إذا المادة معادة، فعّل “معادة؟” وسيظهر حقل العلامة السابقة.",
+    course_name: "اسم المادة",
+    grade_pct: "العلامة %",
+    credits: "الساعات",
+    repeated_q: "معادة؟",
+    old_grade: "العلامة السابقة",
+    add_course: "إضافة مادة",
+    calc_semester: "احسب المعدل الفصلي",
+    semester_avg: "المعدل الفصلي",
+    semester_hours: "مجموع ساعات الفصل",
+    grade_label: "التقدير",
+    semester_note: "لن تُحسب الصفوف الفارغة. لازم (علامة + ساعات) لكل مادة.",
 
-    semTitle: "حساب المعدل الفصلي",
-    semDesc: "أدخل علامة كل مادة (0–100) وعدد ساعاتها. إذا المادة معادة فعّل (معادة؟) وأدخل العلامة السابقة.",
-    repeatBadge: "الإعادة",
-    repeatHint: "إذا كانت العلامة القديمة محسوبة ضمن معدلك السابق، فعّل (معادة؟) وأدخل العلامة السابقة.",
+    cum_title: "حساب المعدل التراكمي",
+    cum_desc: "أدخل المعدل والساعات السابقة. ثم ادمج مع نتائج هذا الفصل. (الإعادة تستبدل العلامة القديمة).",
+    prev_avg: "المعدل التراكمي السابق (%)",
+    prev_hours: "عدد الساعات السابقة",
+    curr_avg: "معدل الفصل الحالي (%)",
+    curr_hours: "ساعات الفصل الحالي",
+    best_use_sem: "أفضل خيار: اضغط “استخدم نتيجة الفصل الحالي”.",
+    use_sem: "استخدم نتيجة الفصل الحالي",
+    calc_cum: "احسب المعدل التراكمي",
+    new_cum: "المعدل التراكمي الجديد",
+    open_print: "فتح شهادة الطباعة (صفحة جديدة)",
+    copyright: "All rights reserved.",
+    yes: "نعم",
 
-    colName: "اسم المادة",
-    colGrade: "العلامة %",
-    colCredits: "الساعات",
-    colRepeat: "معادة؟",
-    colOldGrade: "العلامة السابقة",
+    err_no_courses: "أضف مواد (علامة + ساعات) أولًا.",
+    err_bad_grade: "تأكد أن العلامات بين 0 و 100، والساعات ليست صفر.",
+    ok_sem_done: "تم حساب المعدل الفصلي بنجاح.",
+    ok_cum_done: "تم حساب المعدل التراكمي بنجاح.",
 
-    addCourse: "إضافة مادة",
-    calcSem: "احسب المعدل الفصلي",
+    grade_excellent: "ممتاز",
+    grade_verygood: "جيد جداً",
+    grade_good: "جيد",
+    grade_acceptable: "مقبول",
+    grade_fail: "راسب",
 
-    semAvg: "المعدل الفصلي",
-    semHours: "مجموع ساعات الفصل",
-    semHoursSub: "Semester Hours",
-
-    cumTitle: "حساب المعدل التراكمي",
-    cumDesc: "أدخل معدلك وساعاتك السابقة، ثم دمجها مع نتائج هذا الفصل (مع دعم الاستبدال للمساقات المعادة).",
-    prevAvg: "المعدل التراكمي السابق (%)",
-    prevHours: "عدد الساعات السابقة",
-    currAvg: "معدل الفصل الحالي (%)",
-    currHours: "ساعات الفصل الحالي",
-    useSem: "استخدم نتيجة الفصل الحالي",
-    calcCum: "احسب المعدل التراكمي",
-    newCum: "المعدل التراكمي الجديد",
-
-    congratsTitle: "مبروك! 🎉",
-    improvedText: (d)=>`لقد تحسن معدلك التراكمي بمقدار ${d.toFixed(2)} نقطة — استمر!`,
-    notImprovedText: "معلومة: لم يتحسن المعدل مقارنةً بالسابق (لا بأس).",
-
-    repeatNoteTitle: "ملاحظة الإعادة:",
-    repeatNoteText: "نحسب المساق المعاد على أساس الاستبدال: نطرح أثر العلامة القديمة ثم نضيف علامة هذا الفصل.",
-
-    faqTitle: "أسئلة شائعة",
-    faqQ1: "كيف أحسب المعدل الفصلي؟",
-    faqA1: "نجمع (العلامة × الساعات) لكل المواد ثم نقسم على مجموع الساعات.",
-    faqQ2: "متى أستخدم خيار “معادة؟”؟",
-    faqA2: "إذا كانت العلامة القديمة للمساق محسوبة ضمن معدلك التراكمي السابق الذي أدخلته، فعّل (معادة؟) وأدخل العلامة السابقة.",
-    faqQ3: "هل يتم حفظ بياناتي؟",
-    faqA3: "لا يتم إرسال أي بيانات. الحفظ محلي على جهازك فقط لتجهيز شهادة الطباعة.",
-
-    footerHint: "هذه الأداة غير رسمية ولا تتبع للجامعة.",
-
-    errFix: "رجاءً صحح الأخطاء المظللة بالأحمر.",
-    errGradeRange: "العلامة يجب أن تكون بين 0 و100",
-    errCredits: "الساعات يجب أن تكون أكبر من 0",
-    errOldRequired: "أدخل العلامة السابقة للمساق المعاد",
-    okSaved: "تم تجهيز شهادة الطباعة — افتحها من زر (شهادة الطباعة).",
-
-    gradeExcellent: "ممتاز",
-    gradeVeryGood: "جيد جداً",
-    gradeGood: "جيد",
-    gradePass: "مقبول",
-    gradeFail: "راسب",
-    passWord: "ناجح",
-    failWord: "راسب"
+    congrats: "مبروك! 🎉 لقد تحسن معدلك التراكمي — استمر!"
   },
   en: {
-    appTitle: "Khadouri GPA Calculator",
-    appSubtitleAr: "Semester & Cumulative Calculator — PTUK (Khadouri)",
-    appSubtitleEn: "Palestine Technical University (Kadoorie)",
-    systemChip: "System: 100",
-    printChip: "Print Certificate",
-    printChipHint: "opens new page",
+    print_cert: "Print Certificate",
+    opens_new_tab: "opens new tab",
+    system_100: "System: 100",
+    site_title: "PTUK GPA Calculator (100)",
+    uni_name_ar: "Palestine Technical University – Kadoorie",
+    subtitle: "Semester & Cumulative (100-point)",
+    hero_title: "Fast & Accurate",
+    hero_desc: "Enter grades & credits to get semester and cumulative results instantly. (Print as a certificate)",
+    note_tip: "Note",
+    note_tip_text: "Repeat policy: replaces old grade with the new one (if old is counted in previous GPA).",
 
-    heroTitle: "Semester & Cumulative GPA (100 Scale)",
-    heroDesc: "Enter courses (grade + credits) to get semester GPA, then calculate cumulative GPA using previous GPA and hours.",
-    heroB1: "No login — runs locally.",
-    heroB2: "Supports repeated courses (replacement).",
-    heroB3: "Elegant print certificate in a separate page.",
+    semester_title: "Semester GPA",
+    semester_desc: "Enter each course grade (0–100) and credits. If repeated, enable “Repeated?” then old grade field appears.",
+    course_name: "Course",
+    grade_pct: "Grade %",
+    credits: "Credits",
+    repeated_q: "Repeated?",
+    old_grade: "Old Grade",
+    add_course: "Add course",
+    calc_semester: "Calculate semester",
+    semester_avg: "Semester GPA",
+    semester_hours: "Semester Credits",
+    grade_label: "Rating",
+    semester_note: "Empty rows are ignored. Each course needs (grade + credits).",
 
-    semTitle: "Semester GPA",
-    semDesc: "Enter grade (0–100) and credits. If repeated, enable (Repeated?) and enter old grade.",
-    repeatBadge: "Repeat",
-    repeatHint: "If the old attempt is included in your previous cumulative, mark it as repeated and enter the old grade.",
+    cum_title: "Cumulative GPA",
+    cum_desc: "Enter previous GPA and credits, then merge with current semester. (Repeats replace old grade).",
+    prev_avg: "Previous cumulative GPA (%)",
+    prev_hours: "Previous credits",
+    curr_avg: "Current semester GPA (%)",
+    curr_hours: "Current semester credits",
+    best_use_sem: "Best: click “Use semester result”.",
+    use_sem: "Use semester result",
+    calc_cum: "Calculate cumulative",
+    new_cum: "New cumulative GPA",
+    open_print: "Open print certificate (new tab)",
+    copyright: "All rights reserved.",
+    yes: "Yes",
 
-    colName: "Course name",
-    colGrade: "Grade %",
-    colCredits: "Credits",
-    colRepeat: "Repeated?",
-    colOldGrade: "Old grade",
+    err_no_courses: "Add courses (grade + credits) first.",
+    err_bad_grade: "Make sure grades are 0–100 and credits are not zero.",
+    ok_sem_done: "Semester GPA calculated successfully.",
+    ok_cum_done: "Cumulative GPA calculated successfully.",
 
-    addCourse: "Add course",
-    calcSem: "Calculate semester",
+    grade_excellent: "Excellent",
+    grade_verygood: "Very Good",
+    grade_good: "Good",
+    grade_acceptable: "Pass",
+    grade_fail: "Fail",
 
-    semAvg: "Semester GPA",
-    semHours: "Semester hours",
-    semHoursSub: "Semester Hours",
-
-    cumTitle: "Cumulative GPA",
-    cumDesc: "Enter previous GPA & hours, then combine with this semester (with replacement for repeated courses).",
-    prevAvg: "Previous cumulative GPA (%)",
-    prevHours: "Previous hours",
-    currAvg: "Current semester GPA (%)",
-    currHours: "Current semester hours",
-    useSem: "Use semester result",
-    calcCum: "Calculate cumulative",
-    newCum: "New cumulative GPA",
-
-    congratsTitle: "Congrats! 🎉",
-    improvedText: (d)=>`Your cumulative GPA improved by ${d.toFixed(2)} points — keep going!`,
-    notImprovedText: "Info: GPA did not improve compared to previous.",
-
-    repeatNoteTitle: "Repeat note:",
-    repeatNoteText: "We calculate repeats as replacement: subtract old grade impact, then add this semester grade.",
-
-    faqTitle: "FAQ",
-    faqQ1: "How is semester GPA calculated?",
-    faqA1: "We sum (grade × credits) for all courses then divide by total credits.",
-    faqQ2: "When should I mark a course as repeated?",
-    faqA2: "If the old attempt is included in the previous cumulative GPA you entered, mark it as repeated and enter the old grade.",
-    faqQ3: "Do you store my data?",
-    faqA3: "No data is sent anywhere. We only keep local data to generate the print certificate.",
-
-    footerHint: "Unofficial tool — not affiliated with PTUK.",
-
-    errFix: "Please fix the fields highlighted in red.",
-    errGradeRange: "Grade must be between 0 and 100",
-    errCredits: "Credits must be greater than 0",
-    errOldRequired: "Old grade is required for repeated course",
-    okSaved: "Print report is ready — open it from the Print button.",
-
-    gradeExcellent: "Excellent",
-    gradeVeryGood: "Very Good",
-    gradeGood: "Good",
-    gradePass: "Pass",
-    gradeFail: "Fail",
-    passWord: "Pass",
-    failWord: "Fail"
+    congrats: "Congrats! 🎉 Your cumulative GPA improved — keep going!"
   }
 };
 
-let LANG = localStorage.getItem(LANG_KEY) || "ar";
+let lang = localStorage.getItem(LS_LANG) || "ar";
 
-function t(key, ...args){
-  const val = I18N[LANG][key];
-  return (typeof val === "function") ? val(...args) : val;
+const coursesEl = $("#courses");
+const tpl = $("#courseRowTpl");
+
+const semesterAvgEl = $("#semesterAvg");
+const semesterHoursEl = $("#semesterHours");
+const semesterGradeEl = $("#semesterGrade");
+const semesterAlertEl = $("#semesterAlert");
+
+const prevAvgEl = $("#prevAvg");
+const prevHoursEl = $("#prevHours");
+const currAvgEl = $("#currAvg");
+const currHoursEl = $("#currHours");
+
+const cumAvgEl = $("#cumulativeAvg");
+const cumMetaEl = $("#cumulativeMeta");
+const congratsEl = $("#cumCongrats");
+
+$("#yearNow").textContent = String(new Date().getFullYear());
+
+function t(key){
+  return (I18N[lang] && I18N[lang][key]) || key;
 }
 
-function setLang(next){
-  LANG = next;
-  localStorage.setItem(LANG_KEY, LANG);
+function setLang(newLang){
+  lang = newLang;
+  localStorage.setItem(LS_LANG, lang);
 
   const html = document.documentElement;
-  html.lang = LANG === "ar" ? "ar" : "en";
-  html.dir  = LANG === "ar" ? "rtl" : "ltr";
-  document.body.classList.toggle("is-en", LANG === "en");
+  html.lang = lang;
+  html.dir = (lang === "ar") ? "rtl" : "ltr";
+  document.body.style.fontFamily = (lang === "ar")
+    ? `"Cairo", system-ui, -apple-system, Segoe UI, Arial, sans-serif`
+    : `"Inter", system-ui, -apple-system, Segoe UI, Arial, sans-serif`;
 
-  document.querySelectorAll("[data-i18n]").forEach(el=>{
-    const k = el.getAttribute("data-i18n");
-    el.textContent = t(k);
+  $("#langLabel").textContent = (lang === "ar") ? "AR" : "EN";
+
+  $$("[data-i18n]").forEach(el=>{
+    const key = el.getAttribute("data-i18n");
+    el.textContent = t(key);
   });
 
-  // One example only (course name placeholder) depending on language
-  const firstName = document.querySelector(".row__name");
-  if(firstName){
-    firstName.placeholder = (LANG === "ar") ? "مثال: رياضيات متقطعة" : "e.g., Discrete Math";
-  }
+  // update placeholders (only first row has example)
+  refreshPlaceholders();
+
+  // refresh computed text if exists
+  if (lastSemester) renderSemester(lastSemester);
+  if (lastCumulative) renderCumulative(lastCumulative);
 }
 
-function gradeLabel(avg){
-  if(avg >= 90) return {ar: t("gradeExcellent"), en: I18N.en.gradeExcellent};
-  if(avg >= 80) return {ar: t("gradeVeryGood"), en: I18N.en.gradeVeryGood};
-  if(avg >= 70) return {ar: t("gradeGood"), en: I18N.en.gradeGood};
-  if(avg >= 60) return {ar: t("gradePass"), en: I18N.en.gradePass};
-  return {ar: t("gradeFail"), en: I18N.en.gradeFail};
+function gradeLabel(score){
+  if (!Number.isFinite(score)) return "—";
+  if (score >= 90) return `${t("grade_excellent")} (${lang === "ar" ? "Excellent" : "Excellent"})`;
+  if (score >= 80) return `${t("grade_verygood")} (${lang === "ar" ? "Very Good" : "Very Good"})`;
+  if (score >= 70) return `${t("grade_good")} (${lang === "ar" ? "Good" : "Good"})`;
+  if (score >= 60) return `${t("grade_acceptable")} (${lang === "ar" ? "Pass" : "Pass"})`;
+  return `${t("grade_fail")} (${lang === "ar" ? "Fail" : "Fail"})`;
 }
 
-function passFail(grade){
-  const pass = grade >= 60;
-  return pass ? {ar: t("passWord"), en: I18N.en.passWord} : {ar: t("failWord"), en: I18N.en.failWord};
+function showAlert(msg){
+  semesterAlertEl.hidden = false;
+  semesterAlertEl.textContent = msg;
+}
+function hideAlert(){
+  semesterAlertEl.hidden = true;
+  semesterAlertEl.textContent = "";
 }
 
-function showAlert(el, msg, kind="warn"){
-  el.textContent = msg;
-  el.classList.add("is-show");
-  el.classList.toggle("is-warn", kind === "warn");
-  el.classList.toggle("is-ok", kind === "ok");
-}
+function addCourseRow(prefill = {}){
+  const node = tpl.content.cloneNode(true);
+  const row = node.querySelector(".row");
 
-function hideAlert(el){
-  el.classList.remove("is-show","is-warn","is-ok");
-  el.textContent = "";
-}
+  const name = row.querySelector(".row__name");
+  const grade = row.querySelector(".row__grade");
+  const credits = row.querySelector(".row__credits");
+  const repeat = row.querySelector(".row__repeat");
+  const old = row.querySelector(".row__oldgrade");
+  const del = row.querySelector(".iconbtn");
 
-function addCourseRow({name="", grade="", credits="", repeated=false, oldGrade=""} = {}){
-  const tpl = $("#courseRowTpl");
-  const node = tpl.content.firstElementChild.cloneNode(true);
+  name.value = prefill.name || "";
+  grade.value = (prefill.grade ?? "") === "" ? "" : String(prefill.grade);
+  credits.value = prefill.credits || "";
+  repeat.checked = !!prefill.repeated;
+  old.value = (prefill.oldGrade ?? "") === "" ? "" : String(prefill.oldGrade);
 
-  const nameEl = node.querySelector(".row__name");
-  const gradeEl = node.querySelector(".row__grade");
-  const creditsEl = node.querySelector(".row__credits");
-  const repEl = node.querySelector(".row__repeat");
-  const oldEl = node.querySelector(".row__oldgrade");
-  const delBtn = node.querySelector(".iconbtn");
-
-  nameEl.value = name;
-  gradeEl.value = grade;
-  creditsEl.value = credits;
-  repEl.checked = repeated;
-  oldEl.value = oldGrade;
-
-  function updateRepeatUI(){
-    const on = repEl.checked;
-    oldEl.disabled = !on;
-    oldEl.style.opacity = on ? "1" : ".65";
-    oldEl.parentElement.style.display = on ? "flex" : "none";
-    if(!on){
-      oldEl.value = "";
-      oldEl.classList.remove("is-invalid");
-      oldEl.parentElement.querySelector(".err").textContent = "";
+  function syncOldVisibility(){
+    if (repeat.checked){
+      old.hidden = false;
+    } else {
+      old.hidden = true;
+      old.value = "";
     }
   }
-  updateRepeatUI();
-  repEl.addEventListener("change", updateRepeatUI);
+  repeat.addEventListener("change", syncOldVisibility);
+  syncOldVisibility();
 
-  delBtn.addEventListener("click", ()=>{
-    node.remove();
+  del.addEventListener("click", ()=>{
+    row.remove();
+    refreshPlaceholders();
   });
 
-  // On input, clear red state
-  [nameEl, gradeEl, creditsEl, oldEl].forEach(inp=>{
-    inp.addEventListener("input", ()=>{
-      inp.classList.remove("is-invalid");
-      const err = inp.parentElement.querySelector(".err");
-      if(err) err.textContent = "";
-    });
-  });
-
-  $("#courses").appendChild(node);
-
-  // one example only on very first row
-  const rows = document.querySelectorAll("#courses .row");
-  if(rows.length === 1){
-    nameEl.placeholder = (LANG === "ar") ? "مثال: رياضيات متقطعة" : "e.g., Discrete Math";
-  }else{
-    nameEl.placeholder = (LANG === "ar") ? "اسم المادة" : "Course name";
-  }
+  coursesEl.appendChild(node);
+  refreshPlaceholders();
 }
 
-function readCourses(){
-  const rows = Array.from(document.querySelectorAll("#courses .row"));
-  return rows.map(r=>{
-    const name = r.querySelector(".row__name").value.trim();
-    const grade = parseFloat(r.querySelector(".row__grade").value);
-    const credits = parseFloat(r.querySelector(".row__credits").value);
-    const repeated = r.querySelector(".row__repeat").checked;
-    const oldGrade = parseFloat(r.querySelector(".row__oldgrade").value);
-    return {row:r, name, grade, credits, repeated, oldGrade};
+function refreshPlaceholders(){
+  const rows = $$(".row", coursesEl);
+  rows.forEach((row, idx)=>{
+    const name = row.querySelector(".row__name");
+    const grade = row.querySelector(".row__grade");
+
+    if (lang === "ar"){
+      name.placeholder = (idx === 0) ? "مثال: رياضيات متقطعة" : "اسم المادة";
+      grade.placeholder = (idx === 0) ? "مثال: 95" : "";
+    } else {
+      name.placeholder = (idx === 0) ? "e.g., Discrete Math" : "Course name";
+      grade.placeholder = (idx === 0) ? "e.g., 95" : "";
+    }
   });
+}
+
+function clearInvalid(){
+  $$(".is-invalid").forEach(el=>el.classList.remove("is-invalid"));
+}
+
+function getCourses(){
+  const rows = $$(".row", coursesEl);
+  const out = [];
+
+  rows.forEach(row=>{
+    const name = row.querySelector(".row__name").value.trim();
+    const gradeStr = row.querySelector(".row__grade").value.trim();
+    const creditsStr = row.querySelector(".row__credits").value.trim();
+    const repeated = row.querySelector(".row__repeat").checked;
+    const oldStr = row.querySelector(".row__oldgrade").value.trim();
+
+    // ignore empty row
+    if (!gradeStr && !creditsStr && !name) return;
+
+    const grade = Number(gradeStr);
+    const credits = Number(creditsStr);
+    const oldGrade = oldStr === "" ? null : Number(oldStr);
+
+    out.push({ name: name || (lang === "ar" ? "مادة" : "Course"), grade, credits, repeated, oldGrade });
+  });
+
+  return out;
 }
 
 function validateCourses(courses){
   let ok = true;
+  const rows = $$(".row", coursesEl);
 
-  courses.forEach(c=>{
-    const gradeEl = c.row.querySelector(".row__grade");
-    const creditsEl = c.row.querySelector(".row__credits");
-    const oldEl = c.row.querySelector(".row__oldgrade");
+  courses.forEach((c, idx)=>{
+    const row = rows.find(r=>{
+      const g = r.querySelector(".row__grade").value.trim();
+      const cr = r.querySelector(".row__credits").value.trim();
+      const nm = r.querySelector(".row__name").value.trim();
+      return (g || cr || nm);
+    });
 
-    // grade
-    if(!Number.isFinite(c.grade) || c.grade < 0 || c.grade > 100){
+    const gradeInput = row.querySelector(".row__grade");
+    const creditsInput = row.querySelector(".row__credits");
+    const oldInput = row.querySelector(".row__oldgrade");
+
+    if (!(Number.isFinite(c.grade) && c.grade >= 0 && c.grade <= 100)){
+      gradeInput.classList.add("is-invalid");
       ok = false;
-      gradeEl.classList.add("is-invalid");
-      gradeEl.parentElement.querySelector(".err").textContent = t("errGradeRange");
     }
-
-    // credits
-    if(!Number.isFinite(c.credits) || c.credits <= 0){
+    if (!(Number.isFinite(c.credits) && c.credits > 0)){
+      creditsInput.classList.add("is-invalid");
       ok = false;
-      creditsEl.classList.add("is-invalid");
-      creditsEl.parentElement.querySelector(".err").textContent = t("errCredits");
     }
-
-    // repeated old grade
-    if(c.repeated){
-      if(!Number.isFinite(c.oldGrade) || c.oldGrade < 0 || c.oldGrade > 100){
+    if (c.repeated && c.oldGrade !== null){
+      if (!(Number.isFinite(c.oldGrade) && c.oldGrade >= 0 && c.oldGrade <= 100)){
+        oldInput.classList.add("is-invalid");
         ok = false;
-        oldEl.classList.add("is-invalid");
-        oldEl.parentElement.querySelector(".err").textContent = t("errOldRequired");
       }
     }
   });
@@ -308,213 +298,195 @@ function validateCourses(courses){
   return ok;
 }
 
+let lastSemester = null;
+let lastCumulative = null;
+
 function calcSemester(){
-  const semAlert = $("#semAlert");
-  hideAlert(semAlert);
+  hideAlert();
+  clearInvalid();
 
-  const courses = readCourses();
-  if(courses.length === 0){
-    showAlert(semAlert, t("errFix"), "warn");
+  const courses = getCourses();
+  if (!courses.length){
+    showAlert(t("err_no_courses"));
+    return null;
+  }
+  if (!validateCourses(courses)){
+    showAlert(t("err_bad_grade"));
     return null;
   }
 
-  if(!validateCourses(courses)){
-    showAlert(semAlert, t("errFix"), "warn");
-    return null;
-  }
+  const totalCredits = courses.reduce((s,c)=>s + c.credits, 0);
+  const totalPoints = courses.reduce((s,c)=>s + (c.grade * c.credits), 0);
+  const avg = totalPoints / totalCredits;
 
-  let points = 0;
-  let hours = 0;
+  const res = {
+    courses,
+    semesterAvg: avg,
+    semesterCredits: totalCredits,
+    semesterLabel: gradeLabel(avg)
+  };
+  lastSemester = res;
+  renderSemester(res);
+  showAlert(t("ok_sem_done"));
 
-  courses.forEach(c=>{
-    points += c.grade * c.credits;
-    hours  += c.credits;
-  });
+  // auto-fill current semester fields (nice UX)
+  currAvgEl.value = avg.toFixed(2);
+  currHoursEl.value = String(totalCredits);
 
-  const avg = points / hours;
-  const g = gradeLabel(avg);
+  return res;
+}
 
-  $("#semesterAvg").textContent = avg.toFixed(2);
-  $("#semesterHours").textContent = hours.toFixed(2).replace(/\.00$/,"");
-  $("#semesterGrade").textContent =
-    (LANG === "ar")
-      ? `${g.ar} (${I18N.en[Object.keys(I18N.en).find(k => I18N.en[k] === g.en)] || g.en})`
-      : `${g.en} (${I18N.ar[Object.keys(I18N.ar).find(k => I18N.ar[k] === g.ar)] || g.ar})`;
-
-  // fill cumulative fields helper
-  $("#currAvg").value = avg.toFixed(2);
-  $("#currHours").value = hours.toFixed(2).replace(/\.00$/,"");
-
-  // save for print
-  saveReport({ courses, semesterAvg: avg, semesterHours: hours });
-
-  showAlert(semAlert, t("okSaved"), "ok");
-  return {avg, hours, courses};
+function renderSemester(res){
+  semesterAvgEl.textContent = Number.isFinite(res.semesterAvg) ? res.semesterAvg.toFixed(2) : "—";
+  semesterHoursEl.textContent = Number.isFinite(res.semesterCredits) ? String(res.semesterCredits) : "—";
+  semesterGradeEl.textContent = res.semesterLabel || "—";
 }
 
 function calcCumulative(){
-  const cumAlert = $("#cumAlert");
-  hideAlert(cumAlert);
+  clearInvalid();
+  congratsEl.hidden = true;
+  congratsEl.textContent = "";
 
-  // Ensure we have semester data
-  const sem = calcSemesterSilently();
-  if(!sem){
-    showAlert(cumAlert, t("errFix"), "warn");
-    return;
+  // ensure semester exists (or compute from courses)
+  const sem = lastSemester || calcSemester();
+  if (!sem) return null;
+
+  const prevAvg = Number(prevAvgEl.value);
+  const prevHours = Number(prevHoursEl.value);
+
+  const currAvg = Number(currAvgEl.value || sem.semesterAvg);
+  const currHours = Number(currHoursEl.value || sem.semesterCredits);
+
+  if (!(Number.isFinite(currAvg) && currAvg >= 0 && currAvg <= 100)) {
+    currAvgEl.classList.add("is-invalid");
+    return null;
+  }
+  if (!(Number.isFinite(currHours) && currHours > 0)) {
+    currHoursEl.classList.add("is-invalid");
+    return null;
   }
 
-  const prevAvg = parseFloat($("#prevAvg").value);
-  const prevHours = parseFloat($("#prevHours").value);
+  const hasPrev = (Number.isFinite(prevAvg) && prevAvg >= 0 && prevAvg <= 100 && Number.isFinite(prevHours) && prevHours >= 0);
 
-  if(!Number.isFinite(prevAvg) || prevAvg < 0 || prevAvg > 100 || !Number.isFinite(prevHours) || prevHours < 0){
-    showAlert(cumAlert, t("errFix"), "warn");
-    return;
-  }
+  let prevPoints = hasPrev ? (prevAvg * prevHours) : 0;
+  let adjPrevHours = hasPrev ? prevHours : 0;
 
-  // Replacement logic: remove old attempt from previous totals when repeated is checked
-  const repeats = sem.courses.filter(c=>c.repeated);
-  let prevPoints = prevAvg * prevHours;
-  let prevHoursAdj = prevHours;
-
-  repeats.forEach(c=>{
-    prevPoints -= c.oldGrade * c.credits;
-    prevHoursAdj -= c.credits; // removing old attempt credits
+  // repeat policy = REPLACE old grade with new grade (only if old grade provided)
+  sem.courses.forEach(c=>{
+    if (c.repeated && c.oldGrade !== null && Number.isFinite(c.oldGrade) && Number.isFinite(c.credits) && c.credits > 0){
+      prevPoints -= (c.oldGrade * c.credits);
+      adjPrevHours -= c.credits;
+    }
   });
 
-  // Prevent negative hours in edge cases
-  if(prevHoursAdj < 0) prevHoursAdj = 0;
+  if (adjPrevHours < 0) adjPrevHours = 0;
 
-  const newPoints = prevPoints + sem.semesterAvg * sem.semesterHours;
-  const newHours = prevHoursAdj + sem.semesterHours;
+  const currPoints = currAvg * currHours;
+  const totalHours = adjPrevHours + currHours;
+  const totalPoints = prevPoints + currPoints;
+  const newAvg = totalHours > 0 ? (totalPoints / totalHours) : currAvg;
 
-  const newAvg = (newHours > 0) ? (newPoints / newHours) : 0;
-  const g = gradeLabel(newAvg);
-
-  $("#cumulativeAvg").textContent = newAvg.toFixed(2);
-  $("#cumulativeMeta").textContent =
-    (LANG === "ar")
-      ? `${t("prevHours")} ${prevHoursAdj.toFixed(2).replace(/\.00$/,"")} + ${t("currHours")} ${sem.semesterHours.toFixed(2).replace(/\.00$/,"")} = ${newHours.toFixed(2).replace(/\.00$/,"")} • ${g.ar} (${g.en})`
-      : `${t("prevHours")} ${prevHoursAdj.toFixed(2).replace(/\.00$/,"")} + ${t("currHours")} ${sem.semesterHours.toFixed(2).replace(/\.00$/,"")} = ${newHours.toFixed(2).replace(/\.00$/,"")} • ${g.en} (${g.ar})`;
-
-  // Congrats
-  const improveBox = $("#improveBox");
-  const improveText = $("#improveText");
-  const diff = newAvg - prevAvg;
-
-  if(diff > 0.01){
-    improveBox.hidden = false;
-    improveText.textContent = t("improvedText", diff);
-  }else{
-    improveBox.hidden = false;
-    improveText.textContent = t("notImprovedText");
-  }
-
-  // save for print
-  saveReport({
+  const res = {
+    prevAvg: hasPrev ? prevAvg : null,
+    prevHours: hasPrev ? prevHours : null,
+    adjPrevHours,
+    currAvg,
+    currHours,
+    newAvg,
+    totalHours,
+    label: gradeLabel(newAvg),
+    improved: hasPrev ? (newAvg > prevAvg + 1e-9) : false,
+    delta: hasPrev ? (newAvg - prevAvg) : null,
     courses: sem.courses,
-    semesterAvg: sem.semesterAvg,
-    semesterHours: sem.semesterHours,
-    prevAvg,
-    prevHours,
-    prevHoursAdjusted: prevHoursAdj,
-    cumulativeAvg: newAvg,
-    cumulativeHours: newHours,
-    diff
-  });
-
-  showAlert(cumAlert, "OK", "ok");
-}
-
-function calcSemesterSilently(){
-  const semAlert = $("#semAlert");
-  hideAlert(semAlert);
-
-  const courses = readCourses();
-  if(courses.length === 0) return null;
-  if(!validateCourses(courses)) return null;
-
-  let points = 0;
-  let hours = 0;
-
-  courses.forEach(c=>{
-    points += c.grade * c.credits;
-    hours  += c.credits;
-  });
-
-  const avg = points / hours;
-  return { semesterAvg: avg, semesterHours: hours, courses };
-}
-
-function saveReport(payload){
-  const courses = payload.courses.map(c=>{
-    const pf = passFail(c.grade);
-    return {
-      name: c.name || (LANG === "ar" ? "مادة" : "Course"),
-      grade: c.grade,
-      credits: c.credits,
-      repeated: !!c.repeated,
-      oldGrade: c.repeated ? c.oldGrade : null,
-      passAr: pf.ar,
-      passEn: pf.en
-    };
-  });
-
-  const report = {
-    createdAt: Date.now(),
-    lang: LANG,
-    courses,
-    semesterAvg: payload.semesterAvg ?? null,
-    semesterHours: payload.semesterHours ?? null,
-    prevAvg: payload.prevAvg ?? null,
-    prevHours: payload.prevHours ?? null,
-    prevHoursAdjusted: payload.prevHoursAdjusted ?? null,
-    cumulativeAvg: payload.cumulativeAvg ?? null,
-    cumulativeHours: payload.cumulativeHours ?? null,
-    diff: payload.diff ?? null
+    sem
   };
 
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(report));
+  lastCumulative = res;
+  renderCumulative(res);
+
+  if (res.improved){
+    congratsEl.hidden = false;
+    congratsEl.textContent = t("congrats");
+  }
+  return res;
 }
 
-function openPrint(){
-  // Ensure we have a fresh report
-  const sem = calcSemester();
-  if(!sem) return;
-  // open separate page
-  window.open("print.html", "_blank", "noopener,noreferrer");
+function renderCumulative(res){
+  cumAvgEl.textContent = Number.isFinite(res.newAvg) ? res.newAvg.toFixed(2) : "—";
+
+  const parts = [];
+  if (Number.isFinite(res.totalHours)) parts.push(`${lang==="ar"?"إجمالي الساعات":"Total credits"}: ${res.totalHours}`);
+  if (res.label) parts.push(`${lang==="ar"?"التقدير":"Rating"}: ${res.label}`);
+  if (res.delta !== null) parts.push(`${lang==="ar"?"تحسن":"Delta"}: ${res.delta >= 0 ? "+" : ""}${res.delta.toFixed(2)}`);
+
+  cumMetaEl.textContent = parts.join(" • ");
 }
 
-function bind(){
-  $("#yearNow").textContent = new Date().getFullYear();
+function saveAndOpenPrint(){
+  // ensure we have calculations
+  const sem = lastSemester || calcSemester();
+  if (!sem) return;
 
-  $("#langToggle").addEventListener("click", ()=>{
-    setLang(LANG === "ar" ? "en" : "ar");
-    // After lang switch, update placeholders (one example only)
-    const rows = document.querySelectorAll("#courses .row");
-    rows.forEach((r, i)=>{
-      const name = r.querySelector(".row__name");
-      name.placeholder = (i === 0)
-        ? (LANG === "ar" ? "مثال: رياضيات متقطعة" : "e.g., Discrete Math")
-        : (LANG === "ar" ? "اسم المادة" : "Course name");
-    });
-  });
+  const cum = lastCumulative || calcCumulative(); // if prev fields exist it'll compute, otherwise still prints semester
+  const nowIso = new Date().toISOString();
 
-  $("#addCourseBtn").addEventListener("click", ()=> addCourseRow());
-  $("#calcSemesterBtn").addEventListener("click", calcSemester);
-  $("#useSemesterBtn").addEventListener("click", ()=>{
-    const sem = calcSemester();
-    if(!sem) return;
-    $("#currAvg").value = sem.avg.toFixed(2);
-    $("#currHours").value = sem.hours.toFixed(2).replace(/\.00$/,"");
-  });
-  $("#calcCumulativeBtn").addEventListener("click", calcCumulative);
-  $("#printOpenBtn").addEventListener("click", openPrint);
+  const payload = {
+    lang,
+    generatedAt: nowIso,
+    system: 100,
+    university: {
+      ar: "جامعة فلسطين التقنية – خضوري",
+      en: "Palestine Technical University – Kadoorie"
+    },
+    // NOTE: don't show name in print, only copyright
+    author: "Mohammad Jawad",
+    courses: sem.courses,
+    semester: {
+      avg: sem.semesterAvg,
+      credits: sem.semesterCredits,
+      label: sem.semesterLabel
+    },
+    cumulative: cum ? {
+      prevAvg: cum.prevAvg,
+      prevHours: cum.prevHours,
+      adjPrevHours: cum.adjPrevHours,
+      avg: cum.newAvg,
+      totalHours: cum.totalHours,
+      label: cum.label,
+      improved: cum.improved,
+      delta: cum.delta
+    } : null
+  };
 
-  // initial rows
-  addCourseRow();
-  addCourseRow();
-  addCourseRow();
+  localStorage.setItem(LS_PAYLOAD, JSON.stringify(payload));
+  window.open("print.html", "_blank", "noopener");
 }
 
-setLang(LANG);
-bind();
+// events
+$("#addCourseBtn").addEventListener("click", ()=> addCourseRow());
+$("#calcSemesterBtn").addEventListener("click", calcSemester);
+$("#useSemesterBtn").addEventListener("click", ()=>{
+  const sem = lastSemester || calcSemester();
+  if (!sem) return;
+  currAvgEl.value = sem.semesterAvg.toFixed(2);
+  currHoursEl.value = String(sem.semesterCredits);
+});
+$("#calcCumulativeBtn").addEventListener("click", ()=>{
+  const res = calcCumulative();
+  if (res) showAlert(t("ok_cum_done"));
+});
+
+$("#openPrintBtn").addEventListener("click", saveAndOpenPrint);
+$("#openPrintTop").addEventListener("click", saveAndOpenPrint);
+
+$("#langToggle").addEventListener("click", ()=>{
+  setLang(lang === "ar" ? "en" : "ar");
+});
+
+// init: 4 rows
+addCourseRow();
+addCourseRow();
+addCourseRow();
+addCourseRow();
+
+setLang(lang);
