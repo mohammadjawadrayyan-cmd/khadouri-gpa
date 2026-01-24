@@ -2,7 +2,7 @@ const $ = (sel, root=document) => root.querySelector(sel);
 const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
 
 const LS_LANG = "ptuk_lang";
-const LS_PAYLOAD = "ptuk_gpa_print"; // ✅ مفتاح واحد ثابت للطباعة
+const LS_PRINT_PREFIX = "ptuk_gpa_print_"; // ✅ صار prefix بدل مفتاح ثابت
 
 const I18N = {
   ar: {
@@ -263,22 +263,15 @@ function validateCourses(courses){
   let ok = true;
   const rows = $$(".row", coursesEl);
 
-  let cursor = 0;
-  rows.forEach(r=>{
+  const filledRows = rows.filter(r=>{
     const g = r.querySelector(".row__grade").value.trim();
     const cr = r.querySelector(".row__credits").value.trim();
     const nm = r.querySelector(".row__name").value.trim();
-    if (g || cr || nm) cursor++;
+    return (g || cr || nm);
   });
 
   courses.forEach((c, idx)=>{
-    const row = rows.filter(r=>{
-      const g = r.querySelector(".row__grade").value.trim();
-      const cr = r.querySelector(".row__credits").value.trim();
-      const nm = r.querySelector(".row__name").value.trim();
-      return (g || cr || nm);
-    })[idx];
-
+    const row = filledRows[idx];
     const gradeInput = row.querySelector(".row__grade");
     const creditsInput = row.querySelector(".row__credits");
     const oldInput = row.querySelector(".row__oldgrade");
@@ -419,17 +412,37 @@ function renderCumulative(res){
   const parts = [];
   if (Number.isFinite(res.totalHours)) parts.push(`${lang==="ar"?"إجمالي الساعات":"Total credits"}: ${res.totalHours}`);
   if (res.label) parts.push(`${lang==="ar"?"التقدير":"Rating"}: ${res.label}`);
-  if (res.delta !== null) parts.push(`${lang==="ar"?"تحسّن":"Improvement"}: ${res.delta >= 0 ? "+" : ""}${res.delta.toFixed(2)}`);
+
+  // ✅ بدل “Δ” استخدم “تحسن / Improvement”
+  if (res.delta !== null) {
+    const val = `${res.delta >= 0 ? "+" : ""}${res.delta.toFixed(2)}`;
+    parts.push(`${lang==="ar"?"تحسن":"Improvement"}: ${val}`);
+  }
 
   cumMetaEl.textContent = parts.join(" • ");
 }
 
-// ✅✅ إصلاح الطباعة النهائي: يحفظ آخر نتيجة + يفتح تبويب جديد كل مرة + يكسر الكاش
+/* ✅ تنظيف خفيف لمفاتيح الطباعة القديمة (اختياري لكنه مفيد) */
+function cleanupOldPrintKeys(limit = 25){
+  const keys = [];
+  for (let i=0;i<localStorage.length;i++){
+    const k = localStorage.key(i);
+    if (k && k.startsWith(LS_PRINT_PREFIX)) keys.push(k);
+  }
+  keys.sort(); // الأقدم أولاً غالباً
+  while (keys.length > limit){
+    const old = keys.shift();
+    localStorage.removeItem(old);
+  }
+}
+
+/* ✅✅ طباعة: مفتاح جديد كل مرة + رابط فيه k + كسر كاش ب v */
 function saveAndOpenPrint(){
   const sem = lastSemester || calcSemester();
   if (!sem) return;
 
-  const cum = lastCumulative || calcCumulative(); // إذا ما حسبت تراكمي، بحاول يحسبه من المدخلات
+  const cum = lastCumulative || calcCumulative();
+
   const payload = {
     lang,
     generatedAt: new Date().toISOString(),
@@ -451,14 +464,17 @@ function saveAndOpenPrint(){
       avg: cum.newAvg,
       totalCredits: cum.totalHours,
       label: cum.label,
-      improvement: (cum.delta === null ? null : cum.delta)
+      improvement: (cum.delta === null ? null : cum.delta) // ✅ بدون Δ
     } : null
   };
 
-  localStorage.setItem(LS_PAYLOAD, JSON.stringify(payload));
+  // ✅ مفتاح جديد (مش ثابت)
+  const key = LS_PRINT_PREFIX + Date.now() + "_" + Math.random().toString(16).slice(2);
+  localStorage.setItem(key, JSON.stringify(payload));
+  cleanupOldPrintKeys();
 
-  // 🔥 أهم سطر: ts= يكسر الكاش ويفتح نسخة جديدة دائمًا
-  window.open(`print.html?ts=${Date.now()}`, "_blank", "noopener");
+  const v = Date.now(); // ✅ كسر كاش
+  window.open(`print.html?k=${encodeURIComponent(key)}&v=${v}`, "_blank", "noopener");
 }
 
 // events
