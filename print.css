@@ -1,9 +1,8 @@
 :root{
   --ink:#0b1a12;
   --muted:#4b5c54;
-  --line:rgba(0,0,0,.18);
-  --green:#0b3d2a;
   --head:#0f2f21;
+  --green:#0b3d2a;
 }
 
 *{box-sizing:border-box}
@@ -86,7 +85,12 @@ body{font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
 @media print{
   .no-print{display:none!important}
   body{background:#fff}
-  .sheet{box-shadow:none;border:none;border-radius:0;max-width:100%;margin:0}
+  .sheet{
+    box-shadow:none;border:none;border-radius:0;max-width:100%;margin:0;
+    /* ✅ لتقليل فرصة صفحة ثانية */
+    transform: scale(0.93);
+    transform-origin: top center;
+  }
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   @page{size:A4;margin:10mm}
   thead{display:table-header-group;}
