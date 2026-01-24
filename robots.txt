@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /print.html
-Sitemap: https://mohammadjawadrayyan-cmd.github.io/khadouri-gpa/sitemap.xml
