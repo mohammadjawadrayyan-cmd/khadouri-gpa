@@ -3,17 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
   <title>GPA Certificate</title>
+  <meta name="robots" content="noindex,nofollow">
 
   <!-- كسر كاش -->
   <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 
-  <meta name="robots" content="noindex,nofollow">
-
-  <!-- لاحظ: v= من الرابط بغيّر الملف -->
   <link rel="stylesheet" href="./print.css">
 </head>
 
@@ -40,13 +37,12 @@
     </header>
 
     <section class="title">
-      <h1 id="titleMain">شهادة حساب المعدل</h1>
-      <p id="titleDesc">هذه الشهادة تُظهر مواد الفصل والمعدل الفصلي والتراكمي (نظام 100).</p>
+      <h1>شهادة حساب المعدل</h1>
+      <p>هذه الشهادة تُظهر مواد الفصل والمعدل الفصلي والتراكمي (نظام 100).</p>
     </section>
 
     <section class="block">
       <h2>Courses / جدول المواد</h2>
-
       <div class="tableWrap">
         <table class="tbl">
           <thead>
@@ -82,7 +78,6 @@
     </footer>
   </main>
 
-  <!-- مهم: حمل JS مع v من الرابط -->
   <script>
     const v = new URLSearchParams(location.search).get("v") || Date.now();
     const s = document.createElement("script");
