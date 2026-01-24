@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GPA Certificate - PTUK</title>
+  <link rel="stylesheet" href="print.css?v=20260124">
+  <script defer src="print.js?v=20260124"></script>
+</head>
+
+<body>
+  <div class="toolbar no-print">
+    <button class="btn" id="refreshBtn">تحديث / Refresh</button>
+    <button class="btn" onclick="window.print()">طباعة / Print</button>
+    <button class="btn btn--ghost" onclick="location.href='./'">رجوع / Back</button>
+  </div>
+
+  <main class="page">
+    <section class="cert" id="cert">
+      <header class="cert__head">
+        <div class="logo">PTUK</div>
+
+        <div class="head__titles">
+          <div class="uni-en">Palestine Technical University – Kadoorie</div>
+          <div class="uni-ar">جامعة فلسطين التقنية – خضوري</div>
+          <div class="sub">GPA Certificate • شهادة حساب المعدل</div>
+        </div>
+
+        <div class="dateBox">
+          <div class="dateLabel">التاريخ / Date</div>
+          <div class="dateVal" id="pDate">—</div>
+        </div>
+      </header>
+
+      <section class="cert__title">
+        <h1>شهادة حساب المعدل</h1>
+        <p>هذه الشهادة تُظهر مواد الفصل، والمعدل الفصلي والتراكمي (نظام 100).</p>
+      </section>
+
+      <section class="block">
+        <div class="block__title">Courses / جدول المواد</div>
+
+        <div class="tableWrap">
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th>اسم المادة / Course</th>
+                <th>الساعات / Credits</th>
+                <th>العلامة / Grade</th>
+                <th>النتيجة / Result</th>
+                <th>معادة؟ / Repeated</th>
+              </tr>
+            </thead>
+            <tbody id="pTableBody"></tbody>
+          </table>
+        </div>
+
+        <div class="emptyState" id="emptyState" hidden>
+          لا توجد بيانات للطباعة. ارجع واحسب المعدل ثم افتح شهادة الطباعة.
+        </div>
+      </section>
+
+      <section class="summary">
+        <div class="card">
+          <div class="card__title">المعدل الفصلي / Semester</div>
+          <div class="big" id="pSemAvg">—</div>
+          <div class="meta" id="pSemMeta">—</div>
+        </div>
+
+        <div class="card">
+          <div class="card__title">المعدل التراكمي / Cumulative</div>
+          <div class="big" id="pCumAvg">—</div>
+          <div class="meta" id="pCumMeta">—</div>
+        </div>
+      </section>
+
+      <footer class="foot">
+        <span>Mohammad Jawad — All rights reserved © <span id="yearNow"></span></span>
+      </footer>
+    </section>
+  </main>
+</body>
+</html>
